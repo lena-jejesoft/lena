@@ -14,13 +14,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" className="dark" suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem("pudding-theme");if(t==="light"){document.documentElement.classList.remove("dark");document.documentElement.setAttribute("data-theme","light")}else{document.documentElement.classList.add("dark");document.documentElement.setAttribute("data-theme","dark")}}catch(e){}})()`,
-          }}
-        />
-      </head>
       <body>{children}</body>
     </html>
   );
