@@ -1,0 +1,291 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Brand */
+  --claude-orange: #E57B53;
+
+  /* Legacy theme vars (keep during migration) */
+  --bg-dark: #ffffff;
+  --bg-medium: #f5f5f5;
+  --bg-light: #ebebeb;
+  --bg-hover: #d8d8d8;
+  --border-color: #d0d0d0;
+  --bg-secondary: #ebebeb;
+  --bg-tertiary: #ebebeb;
+  --text-primary: #1a1a1a;
+  --text-secondary: #333333;
+  --text-muted: #666666;
+  --text-dim: #999999;
+
+  /* ChartLab colors */
+  --chartlab-primary: #C15F3C;
+  --chartlab-highlight: #4a4a4a;
+  --chartlab-active-bg: #3a3a3a;
+  --chartlab-gray-warm: #B1ADA1;
+  --chartlab-terra: #da7756;
+  --chartlab-sage: #7D8471;
+  --chartlab-lavender: #9B8AA6;
+  --chartlab-tan: #D4A574;
+  --chartlab-slate: #6B7B8C;
+  --chartlab-coffee: #A67B5B;
+
+  /* Semantic */
+  --positive: #4ade80;
+  --negative: #f87171;
+  --warning: #fbbf24;
+
+  /* shadcn/ui - Light theme */
+  --radius: 0.5rem;
+  --background: #ffffff;
+  --foreground: #1a1a1a;
+  --card: #f5f5f5;
+  --card-foreground: #333333;
+  --popover: #ffffff;
+  --popover-foreground: #1a1a1a;
+  --primary: #E57B53;
+  --primary-foreground: #ffffff;
+  --secondary: #ebebeb;
+  --secondary-foreground: #1a1a1a;
+  --muted: #f5f5f5;
+  --muted-foreground: #666666;
+  --accent: #ebebeb;
+  --accent-foreground: #1a1a1a;
+  --destructive: #f87171;
+  --border: #d0d0d0;
+  --input: #d0d0d0;
+  --ring: #E57B53;
+  --chart-1: #E57B53;
+  --chart-2: #4ade80;
+  --chart-3: #6B7B8C;
+  --chart-4: #fbbf24;
+  --chart-5: #9B8AA6;
+  --sidebar: #f5f5f5;
+  --sidebar-foreground: #1a1a1a;
+  --sidebar-primary: #E57B53;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #ebebeb;
+  --sidebar-accent-foreground: #1a1a1a;
+  --sidebar-border: #d0d0d0;
+  --sidebar-ring: #E57B53;
+}
+
+.dark {
+  /* Legacy theme vars */
+  --bg-dark: #1a1a1a;
+  --bg-medium: #252525;
+  --bg-light: #2d2d2d;
+  --bg-hover: #3a3a3a;
+  --bg-secondary: #2a2a2a;
+  --bg-tertiary: #2a2a2a;
+  --border-color: #3a3a3a;
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --text-muted: #888888;
+  --text-dim: #666666;
+
+  /* shadcn/ui - Dark theme */
+  --background: #1a1a1a;
+  --foreground: #ffffff;
+  --card: #252525;
+  --card-foreground: #cccccc;
+  --popover: #252525;
+  --popover-foreground: #ffffff;
+  --primary: #E57B53;
+  --primary-foreground: #ffffff;
+  --secondary: #2d2d2d;
+  --secondary-foreground: #ffffff;
+  --muted: #2d2d2d;
+  --muted-foreground: #888888;
+  --accent: #2d2d2d;
+  --accent-foreground: #ffffff;
+  --destructive: #f87171;
+  --border: #3a3a3a;
+  --input: #3a3a3a;
+  --ring: #E57B53;
+  --chart-1: #E57B53;
+  --chart-2: #4ade80;
+  --chart-3: #6B7B8C;
+  --chart-4: #fbbf24;
+  --chart-5: #9B8AA6;
+  --sidebar: #1a1a1a;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #E57B53;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #2d2d2d;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #3a3a3a;
+  --sidebar-ring: #E57B53;
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/* Base styles */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 400;
+  line-height: 1.3;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+  background: var(--background);
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+/* Highcharts custom overrides */
+.highcharts-button-box {
+  fill: var(--bg-light);
+}
+
+.highcharts-button text {
+  fill: var(--text-secondary) !important;
+  font-weight: 300 !important;
+}
+
+.highcharts-button-pressed .highcharts-button-box {
+  fill: var(--claude-orange) !important;
+}
+
+.highcharts-button-pressed text {
+  fill: #fff !important;
+}
+
+.highcharts-exporting-group {
+  transform: scale(0.6);
+  transform-origin: top right;
+  opacity: 0.4;
+  transition: opacity 0.2s;
+}
+
+.highcharts-exporting-group:hover {
+  opacity: 0.8;
+}
+
+.highcharts-button-symbol {
+  stroke: var(--text-muted) !important;
+  stroke-width: 1.5px !important;
+}
+
+.highcharts-menu {
+  background: var(--bg-light) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+.highcharts-menu-item {
+  color: var(--text-secondary) !important;
+  font-size: 11px !important;
+}
+
+.highcharts-menu-item:hover {
+  background: var(--bg-hover) !important;
+  color: var(--claude-orange) !important;
+}
+
+/* Hierarchy tree: hide native disclosure marker */
+.hierarchy-tree > summary {
+  list-style: none;
+}
+.hierarchy-tree > summary::-webkit-details-marker {
+  display: none;
+}
+.hierarchy-tree > summary::marker {
+  display: none;
+  content: "";
+}
+
+.chartlab-style-number-input {
+  /* background: var(--bg-dark); */
+  border: 1px solid var(--border-color);
+  /* width: 50px; */
+  /* color: var(--text-primary); */
+  text-align: center;
+  border-radius: 4px;
+  padding: 5px 6px;
+  font-size: 11px;
+}
