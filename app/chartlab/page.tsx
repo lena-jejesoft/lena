@@ -2,16 +2,10 @@
 
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { SavedChart } from "@/lib/types";
-import type { ChartType, ChartStyle, ChartData, CartesianPoint, CartesianStyle, PieStyle, TreemapStyle, GeoGridStyle, OHLCPoint, Scenario } from "@/components/chart/types";
-import { useResizer } from "@/hooks/useResizer";
+import type { ChartType, ChartStyle, ChartData, CartesianPoint, CartesianStyle, OHLCPoint } from "@/components/chart/types";
 import { Page, Panel } from "@/components/layout";
-import { HorizontalResizer } from "@/components/resizer/HorizontalResizer";
-import { DataChart } from "@/components/chart/DataChart";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { fetchSamsungSecuritiesOhlcv, toLightweightCandlesChartData } from "./query";
-import { CHART_TYPE_OPTIONS } from "./chart-type-options";
 import { ChartBlockCard } from "./chart-block-card";
 // ─── Types ───
 
@@ -760,51 +754,9 @@ export default function ChartLabPage() {
   const [blocks, setBlocks] = useState<ChartBlock[]>(() => [createChartBlock("line", "샘플 차트")]);
   const [activeBlockId, setActiveBlockId] = useState<number | null>(null);
 
-  // Saved charts (from DB)
-  const [savedCharts, setSavedCharts] = useState<SavedChart[]>([]);
-  const [loadingSaved, setLoadingSaved] = useState(true);
-
-  // Preview state
-  const [previewChart, setPreviewChart] = useState<{ id: string | number; type: "recent" | "saved" } | null>(null);
   const [samsungOhlcvData, setSamsungOhlcvData] = useState<ChartData | null>(null);
   const [samsungOhlcvLoaded, setSamsungOhlcvLoaded] = useState(false);
   const [samsungOhlcvError, setSamsungOhlcvError] = useState<string | null>(null);
-
-  // Resizer
-  const { rightWidth, isDragging, isCollapsed, containerRef, handleMouseDown } =
-    useResizer({ direction: "horizontal", initialRightWidth: 300, minRight: 240, minLeft: 400 });
-
-  useEffect(() => {
-    let isDisposed = false;
-
-    async function loadSavedCharts() {
-      setLoadingSaved(true);
-      const { data: { user } } = await supabase.auth.getUser();
-
-      let query = supabase
-        .from("user_charts")
-        .select("*")
-        .order("updated_at", { ascending: false });
-
-      if (user) {
-        query = query.or(`user_id.eq.${user.id},is_public.eq.true`);
-      } else {
-        query = query.eq("is_public", true);
-      }
-
-      const { data } = await query;
-      if (!isDisposed) {
-        setSavedCharts((data || []) as SavedChart[]);
-        setLoadingSaved(false);
-      }
-    }
-
-    loadSavedCharts();
-
-    return () => {
-      isDisposed = true;
-    };
-  }, [supabase]);
 
   useEffect(() => {
     let isDisposed = false;
@@ -903,32 +855,8 @@ export default function ChartLabPage() {
     );
   }, [updateBlock, samsungOhlcvData, samsungOhlcvLoaded]);
 
-  // ─── Preview ───
-
-  const previewData = useMemo(() => {
-    if (!previewChart) return null;
-    if (previewChart.type === "recent") {
-      const block = blocks.find((b) => b.id === previewChart.id);
-      if (!block) return null;
-      return { data: block.data, chartType: block.chartType, style: block.style };
-    }
-    // For saved charts, show demo data based on chart_type
-    const saved = savedCharts.find((c) => c.id === previewChart.id);
-    if (!saved) return null;
-    const ct = (CHART_TYPE_OPTIONS.find((o) => o.value === saved.chart_type)?.value || "line") as ChartType;
-    return { data: generateDemoData(ct), chartType: ct, style: { legend: { position: "bottom" as const }, tooltip: { shared: true } } };
-  }, [previewChart, blocks, savedCharts]);
-
-  // ─── Delete saved chart ───
-
-  async function deleteSavedChart(id: string) {
-    await supabase.from("user_charts").delete().eq("id", id);
-    setSavedCharts((prev) => prev.filter((c) => c.id !== id));
-    if (previewChart?.id === id) setPreviewChart(null);
-  }
-
   return (
-    <Page direction="horizontal" ref={containerRef}>
+    <Page direction="horizontal">
       {/* ═══ Center Panel ═══ */}
       <Panel variant="flex" className="flex flex-col min-w-0">
         {/* Header */}
@@ -966,116 +894,6 @@ export default function ChartLabPage() {
               차트가 없습니다. 새 차트를 추가하세요.
             </div>
           )}
-        </div>
-      </Panel>
-
-      {/* ═══ Resizer ═══ */}
-      <HorizontalResizer onMouseDown={handleMouseDown} isCollapsed={isCollapsed} isDragging={isDragging} />
-
-      {/* ═══ Right Panel ═══ */}
-      <Panel
-        variant="fixed"
-        className="flex flex-col"
-        style={{ width: isCollapsed ? 0 : rightWidth, overflow: isCollapsed ? "hidden" : undefined }}
-      >
-        <div className="flex flex-col h-full pt-6">
-          {/* Section 1: Recent charts */}
-          <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
-            <div className="flex items-center justify-between px-3 py-2 shrink-0">
-              <span className="text-[12px] font-semibold text-foreground">최근 작업한 차트</span>
-              <span className="text-xs text-muted-foreground">{blocks.length}개</span>
-            </div>
-            <div className="flex-1 overflow-y-auto px-3 pb-2 flex flex-col gap-1.5">
-              {blocks.map((block) => (
-                <Button
-                  key={block.id}
-                  variant="outline"
-                  size="sm"
-                  className={cn(
-                    "w-full text-left p-2.5 h-auto justify-start flex-col items-start text-xs",
-                    activeBlockId === block.id && "border-primary bg-accent"
-                  )}
-                  onClick={() => {
-                    setActiveBlockId(block.id);
-                    setPreviewChart({ id: block.id, type: "recent" });
-                  }}
-                >
-                  <div className="font-medium text-foreground truncate w-full">{block.title}</div>
-                  <div className="text-[10px] text-muted-foreground mt-1">
-                    {CHART_TYPE_OPTIONS.find((o) => o.value === block.chartType)?.label || block.chartType}
-                  </div>
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          {/* Section 2: Saved charts */}
-          <div className="flex-1 min-h-0 flex flex-col overflow-hidden border-t border-border">
-            <div className="flex items-center justify-between px-3 py-2 shrink-0">
-              <span className="text-[12px] font-semibold text-foreground">저장된 차트</span>
-              <span className="text-xs text-muted-foreground">{savedCharts.length}개</span>
-            </div>
-            <div className="flex-1 overflow-y-auto px-3 pb-2 flex flex-col gap-1.5">
-              {loadingSaved ? (
-                <div className="text-xs text-muted-foreground text-center py-4">불러오는 중...</div>
-              ) : savedCharts.length === 0 ? (
-                <div className="text-xs text-muted-foreground text-center py-4">저장된 차트 없음</div>
-              ) : (
-                savedCharts.map((chart) => (
-                  <div
-                    key={chart.id}
-                    className={cn(
-                      "p-2.5 rounded-md border border-border bg-card cursor-pointer transition-all text-xs hover:border-primary/60",
-                      previewChart?.id === chart.id && previewChart.type === "saved" && "border-primary bg-accent"
-                    )}
-                    onClick={() => setPreviewChart({ id: chart.id, type: "saved" })}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-foreground truncate">{chart.title}</span>
-                      <Button
-                        variant="ghost"
-                        size="icon-xs"
-                        className="text-[10px] text-destructive hover:text-destructive/80 shrink-0 ml-2"
-                        onClick={(e) => { e.stopPropagation(); deleteSavedChart(chart.id); }}
-                      >
-                        삭제
-                      </Button>
-                    </div>
-                    <div className="text-[10px] text-muted-foreground mt-1">
-                      {chart.chart_type} · {new Date(chart.updated_at).toLocaleDateString("ko-KR")}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-
-          {/* Section 3: Preview */}
-          <div className="flex-[0.8] min-h-0 flex flex-col overflow-hidden border-t border-border bg-card/50">
-            <div className="flex items-center justify-between px-3 py-2 shrink-0">
-              <span className="text-[12px] font-semibold text-foreground">미리보기</span>
-              {previewChart && (
-                <span className="text-[10px] text-muted-foreground">
-                  {previewChart.type === "recent" ? "최근 차트" : "저장된 차트"}
-                </span>
-              )}
-            </div>
-            <div className="flex-1 overflow-hidden p-2">
-              {previewData ? (
-                <DataChart
-                  data={previewData.data}
-                  chartType={previewData.chartType}
-                  style={previewData.style}
-                  scenario={(previewData.style as CartesianStyle | undefined)?.lightweightCandles?.scenario}
-                  height={200}
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full text-xs text-muted-foreground">
-                  차트를 선택하세요
-                </div>
-              )}
-            </div>
-          </div>
         </div>
       </Panel>
     </Page>
