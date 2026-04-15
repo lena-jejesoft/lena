@@ -1,7 +1,7 @@
 "use client"
 
 import type { ComponentProps } from "react"
-import type { ChartType } from "@/components/chart/types"
+import type { ChartType } from "@/packages/chart-lib/types"
 import { cn } from "@/lib/utils"
 
 export type ChartTypeIconKey =

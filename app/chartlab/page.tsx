@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { ChartType, ChartStyle, ChartData, CartesianPoint, CartesianStyle, OHLCPoint } from "@/components/chart/types";
+import type { ChartType, ChartStyle, ChartData, CartesianPoint, CartesianStyle, OHLCPoint } from "@/packages/chart-lib/types";
 import { Page, Panel } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { fetchSamsungSecuritiesOhlcv, toLightweightCandlesChartData } from "./query";

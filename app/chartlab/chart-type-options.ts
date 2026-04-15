@@ -1,4 +1,4 @@
-import type { ChartType } from "@/components/chart/types";
+import type { ChartType } from "@/packages/chart-lib/types";
 import type { ChartTypeIconKey } from "./chart-type-icon";
 
 export type ChartTypeOption = {

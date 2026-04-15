@@ -1,4 +1,4 @@
-import type { ChartData, OHLCPoint } from "@/components/chart/types"
+import type { ChartData, OHLCPoint } from "@/packages/chart-lib/types"
 
 export type AdapterCellValue = string | number | null
 export type AdapterRow = Record<string, AdapterCellValue>

@@ -1,4 +1,4 @@
-import { ChartData, OHLCPoint } from "@/components/chart/types";
+import { ChartData, OHLCPoint } from "@/packages/chart-lib/types";
 import { createClient } from "@/lib/supabase/client";
 
 export const OHLCV_METRIC_NAMES = ["open", "high", "low", "close", "volume", "turnover"] as const;

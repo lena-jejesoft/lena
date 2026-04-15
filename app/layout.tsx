@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import "@/components/chart/chartCore/chartCore.css";
+import "@/packages/chart-lib/chartCore/chartCore.css";
 
 export const metadata: Metadata = {
   title: "Lena - Chart Builder",

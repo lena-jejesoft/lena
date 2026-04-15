@@ -1,4 +1,4 @@
-import type { ChartData } from "@/components/chart/types"
+import type { ChartData } from "@/packages/chart-lib/types"
 import type { MetricValueRow } from "./query"
 import type {
   HierarchyMetricCandidate,

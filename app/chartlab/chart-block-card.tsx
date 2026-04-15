@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import type { ChartType, ChartStyle, ChartData, CartesianStyle } from "@/components/chart/types";
+import type { ChartType, ChartStyle, ChartData, CartesianStyle } from "@/packages/chart-lib/types";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
-import { setChartTheme } from "@/components/chart/recharts-core/recharts-wrapper";
-import type { ChartType as LegendChartType } from "@/components/chart/recharts-core/recharts-type";
+import { setChartTheme } from "@/packages/chart-lib/recharts-core/recharts-wrapper";
+import type { ChartType as LegendChartType } from "@/packages/chart-lib/recharts-core/recharts-type";
 import { AlertTriangle, CircleDot } from "lucide-react";
 import { CHART_TYPE_OPTIONS } from "./chart-type-options";
 import ChartBlockCardBody from "./chart-block-card-body";

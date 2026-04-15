@@ -24,8 +24,8 @@ components/chart/
 ### 기본
 
 ```tsx
-import { DataChart } from "@/components/chart/DataChart";
-import type { ChartData, ChartType, ChartStyle } from "@/components/chart/types";
+import { DataChart } from "@/packages/chart-lib/DataChart";
+import type { ChartData, ChartType, ChartStyle } from "@/packages/chart-lib/types";
 
 <DataChart
   data={chartData}
@@ -168,7 +168,7 @@ interface WaterfallStyle {
 ### stockDataToChartData
 
 ```typescript
-import { stockDataToChartData, stockDataDefaultStyle } from "@/components/chart/adapters";
+import { stockDataToChartData, stockDataDefaultStyle } from "@/packages/chart-lib/adapters";
 
 const chartData = stockDataToChartData(stockData, financialMetrics, {
   activeIndicators: ["revenue", "per"],
@@ -182,7 +182,7 @@ const style = stockDataDefaultStyle(); // 3개 Y축, legend: none
 ### documentChartToChartData
 
 ```typescript
-import { documentChartToChartData } from "@/components/chart/adapters";
+import { documentChartToChartData } from "@/packages/chart-lib/adapters";
 
 const { data, chartType, style } = documentChartToChartData(chart);
 
@@ -202,7 +202,7 @@ const { data, chartType, style } = documentChartToChartData(chart);
 각 차트 유형이 요구하는 데이터 포인트 형식과 지원하는 X축 유형을 정의.
 
 ```typescript
-import { CHART_TYPE_REGISTRY } from "@/components/chart/registry";
+import { CHART_TYPE_REGISTRY } from "@/packages/chart-lib/registry";
 
 const spec = CHART_TYPE_REGISTRY["line"];
 // { pointType: "cartesian", xAxisTypes: ["datetime", "category", "numeric"], ... }
@@ -213,7 +213,7 @@ const spec = CHART_TYPE_REGISTRY["line"];
 각 차트 유형에 적용 가능한 스타일 옵션 목록. 사이드바/모달 UI가 이를 참조하여 동적으로 컨트롤을 표시.
 
 ```typescript
-import { CHART_STYLE_OPTIONS } from "@/components/chart/registry";
+import { CHART_STYLE_OPTIONS } from "@/packages/chart-lib/registry";
 
 const styleSpec = CHART_STYLE_OPTIONS["line"];
 // { styleType: "cartesian", options: ["colorPalette", "lineWidth", "markerEnabled", ...] }

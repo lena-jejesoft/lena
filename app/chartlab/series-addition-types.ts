@@ -1,4 +1,4 @@
-import type { ChartData, ChartStyle, ChartType } from "@/components/chart/types"
+import type { ChartData, ChartStyle, ChartType } from "@/packages/chart-lib/types"
 import type { PageHDbDimensionKey, PageHDbMetricKey } from "./page-h-db"
 import type { MetricDimension, MetricEntitySource, MetricValueRow } from "./query"
 

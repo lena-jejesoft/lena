@@ -20,7 +20,7 @@
     ],
     "paths": {
       "@/*": ["./*"],
-      "@chartCore/*": ["./components/chart/chartCore/*"],
+      "@chartCore/*": ["./packages/chart-lib/chartCore/*"],
     },
   },
   "include": [

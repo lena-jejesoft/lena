@@ -14,8 +14,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ChartRenderer } from "@/components/chart/ChartRenderer";
-import type { ChartData, ChartType } from "@/components/chart/types";
+import { ChartRenderer } from "@/packages/chart-lib/ChartRenderer";
+import type { ChartData, ChartType } from "@/packages/chart-lib/types";
 import {
   fetchCompanyMetricCatalog,
   type CompanyMetricCatalogItem,

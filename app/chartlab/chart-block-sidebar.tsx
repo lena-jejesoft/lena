@@ -7,7 +7,7 @@ import type {
   ChartStyle,
   ChartType,
   Scenario,
-} from "@/components/chart/types";
+} from "@/packages/chart-lib/types";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";

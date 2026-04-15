@@ -1,7 +1,7 @@
 import { format, getISOWeek, getISOWeekYear } from "date-fns";
 import { AIChartConfig, ChartDataItem, DataAnalysisResult, DatetimeType, ExtendedDataAnalysisResult, HierarchyGroup, MissingValueInfo, OutlierInfo, RechartsChartData, RegionClassifiedData, SeriesIQRInfo, UnitSettings } from "./recharts-type";
 import { ChartType } from "./recharts-wrapper";
-import type { ChartData as OrgChartData } from "@/components/chart/types";
+import type { ChartData as OrgChartData } from "@/packages/chart-lib/types";
 
 type ChartData = RechartsChartData
 
