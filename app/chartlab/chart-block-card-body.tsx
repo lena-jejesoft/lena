@@ -841,7 +841,7 @@ function SeriesColorPopover({
           </TabsList>
           <TabsContent value="palette" className="mt-0">
             <div className="flex flex-wrap gap-1">
-              {chartColors.map((color) => (
+              {BASE_PALETTE.map((color) => (
                 <button
                   key={`${seriesId}-${color}`}
                   type="button"
