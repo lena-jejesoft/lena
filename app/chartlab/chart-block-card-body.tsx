@@ -4574,42 +4574,23 @@ function Phase3Screen() {
               <p className="text-[13px] font-medium">{activeBlock.title}</p>
               <p className="text-[11px] text-muted-foreground">{activeBlock.description}</p>
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="rounded-sm border border-border px-1.5 py-0.5 text-[10px] text-muted-foreground">
-                이상치 {chartState.showOutliers ? "ON" : "OFF"}
-              </span>
-              <span className="rounded-sm border border-border px-1.5 py-0.5 text-[10px] text-muted-foreground">
-                툴팁 {chartState.showTooltip ? "ON" : "OFF"}
-              </span>
-            </div>
           </div>
         </PanelHeader>
         <PanelBody className="space-y-2 px-3 py-2">
           <div className="flex flex-wrap gap-1.5">
-            {blocks.map((block) => {
-              const state = getChartState(block.id)
-              return (
-                <button
-                  key={block.id}
-                  type="button"
-                  onClick={() => setActiveChartId(block.id)}
-                  className={cn(
-                    "text-left rounded-sm border px-2 py-1.5 transition-colors",
-                    block.id === activeBlock.id ? "border-primary bg-primary/5" : "border-border hover:bg-accent/50"
-                  )}
-                >
-                  <p className="text-xs font-medium">{block.title}</p>
-                  <div className="mt-1 flex gap-1">
-                    <span className="rounded-sm bg-secondary px-1.5 py-0.5 text-[10px]">
-                      이상치 {state.showOutliers ? "ON" : "OFF"}
-                    </span>
-                    <span className="rounded-sm bg-secondary px-1.5 py-0.5 text-[10px]">
-                      툴팁 {state.showTooltip ? "ON" : "OFF"}
-                    </span>
-                  </div>
-                </button>
-              )
-            })}
+            {blocks.map((block) => (
+              <button
+                key={block.id}
+                type="button"
+                onClick={() => setActiveChartId(block.id)}
+                className={cn(
+                  "text-left rounded-sm border px-2 py-1.5 transition-colors",
+                  block.id === activeBlock.id ? "border-primary bg-primary/5" : "border-border hover:bg-accent/50"
+                )}
+              >
+                <p className="text-xs font-medium">{block.title}</p>
+              </button>
+            ))}
           </div>
 
           <div
