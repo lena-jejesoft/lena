@@ -3,14 +3,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@chartCore/src/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@chartCore/src/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@chartCore/src/components/ui/select";
 import { Label } from "@chartCore/src/components/ui/label";
 import { Button } from "@chartCore/src/components/ui/button";
@@ -1639,89 +1631,6 @@ export default function ChartToolView({
       {shouldRenderExternalLegend && externalLegendContainer
         ? createPortal(legendPanelNode, externalLegendContainer)
         : null}
-
-      {/* 데이터 테이블 */}
-      {isExecuted && chartData && chartData.length > 0 && (
-        <Card className="mt-4">
-          <CardHeader className="py-3">
-            <CardTitle className="text-sm font-medium">데이터 테이블</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="max-h-[300px] overflow-auto">
-              {chartType === "geo-grid" ? (
-                // geo-grid용 테이블 (모든 시점을 컬럼으로 표시)
-                (() => {
-                  const timepoints = MOCK_TIMEPOINT_GEO_GRID_DATA;
-                  const baseData = geoGridMapLevel === "seoul"
-                    ? timepoints[0].seoulData
-                    : timepoints[0].nationalData;
-
-                  return (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="sticky top-0 left-0 bg-background text-xs py-1.5 px-2 z-10">지역명</TableHead>
-                          {timepoints.map(tp => (
-                            <TableHead key={tp.timepoint} className="sticky top-0 bg-background text-right text-xs py-1.5 px-2">
-                              {tp.timepoint}
-                            </TableHead>
-                          ))}
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {baseData.map((item) => (
-                          <TableRow key={item.districtId}>
-                            <TableCell className="font-medium text-xs py-1.5 px-2 sticky left-0 bg-background">{item.districtName}</TableCell>
-                            {timepoints.map(tp => {
-                              const data = geoGridMapLevel === "seoul" ? tp.seoulData : tp.nationalData;
-                              const regionData = data.find(d => d.districtId === item.districtId);
-                              return (
-                                <TableCell key={tp.timepoint} className="text-right text-xs py-1.5 px-2">
-                                  {regionData?.value != null ? regionData.value.toLocaleString() : "-"}
-                                </TableCell>
-                              );
-                            })}
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  );
-                })()
-              ) : (
-                // 기존 테이블
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="sticky top-0 bg-background text-xs py-1.5 px-2">시점</TableHead>
-                      {seriesFields.map((field) => (
-                        <TableHead key={field} className="sticky top-0 bg-background text-right text-xs py-1.5 px-2">
-                          {seriesLabelMap[field] ?? field}
-                        </TableHead>
-                      ))}
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {chartData.map((row, idx) => (
-                      <TableRow key={idx}>
-                        <TableCell className="font-medium text-xs py-1.5 px-2">{row.date_display}</TableCell>
-                        {seriesFields.map((field) => (
-                          <TableCell key={field} className="text-right text-xs py-1.5 px-2">
-                            {row[field] != null
-                              ? typeof row[field] === "number"
-                                ? (row[field] as number).toLocaleString()
-                                : String(row[field])
-                              : "-"}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* 주석 카드 (이상치/결측치 정보) */}
       {isExecuted && analysisResult && (
