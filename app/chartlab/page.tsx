@@ -15,7 +15,6 @@ interface ChartBlock {
   chartType: ChartType;
   style: ChartStyle;
   data: ChartData;
-  collapsed: boolean;
 }
 
 
@@ -741,7 +740,6 @@ function createChartBlock(chartType: ChartType = "line", title?: string): ChartB
     chartType,
     style: { legend: { position: "bottom" }, tooltip: { shared: true } },
     data: generateDemoData(chartType),
-    collapsed: false,
   };
 }
 
@@ -798,18 +796,6 @@ export default function ChartLabPage() {
 
   // ─── Block actions ───
 
-  const addBlock = useCallback(() => {
-    const block = createChartBlock();
-    setBlocks((prev) => [...prev, block]);
-    setActiveBlockId(block.id);
-  }, []);
-
-  const toggleCollapse = useCallback((id: number) => {
-    setBlocks((prev) =>
-      prev.map((b) => (b.id === id ? { ...b, collapsed: !b.collapsed } : b))
-    );
-  }, []);
-
   const updateBlock = useCallback((id: number, patch: Partial<ChartBlock>) => {
     setBlocks((prev) =>
       prev.map((b) => (b.id === id ? { ...b, ...patch } : b))
@@ -842,12 +828,7 @@ export default function ChartLabPage() {
       <Panel variant="flex" className="flex flex-col min-w-0">
         {/* Header */}
         <div className="p-4 border-b border-border shrink-0">
-          <div className="flex items-center justify-between">
-            <h1 className="text-xl font-medium text-foreground">차트랩</h1>
-            <Button size="sm" onClick={addBlock}>
-              + 새 차트 추가
-            </Button>
-          </div>
+          <h1 className="text-xl font-medium text-foreground">차트랩</h1>
         </div>
 
         {/* Chart blocks scroll area */}
@@ -858,7 +839,6 @@ export default function ChartLabPage() {
               block={block}
               isActive={activeBlockId === block.id}
               onActivate={() => setActiveBlockId(block.id)}
-              onToggleCollapse={() => toggleCollapse(block.id)}
               onTitleChange={(title) => updateBlock(block.id, { title })}
               onChartTypeChange={(type) => handleChartTypeChange(block.id, type)}
               onStyleChange={(style) => updateBlock(block.id, { style })}

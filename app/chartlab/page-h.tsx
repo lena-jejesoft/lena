@@ -237,7 +237,7 @@ const BLEND_MAPPING_VALUE_LABEL_MAP: Record<string, string> = {
 const SAMPLE_BLOCKS: BlendedChartBlock[] = [
   {
     id: "chart-1",
-    title: "새 차트",
+    title: "",
     description: "",
     chartType: "chartCore/line",
     data: { xAxisType: "category", series: [] },
@@ -683,7 +683,7 @@ function ToggleSwitch({
       onClick={() => onChange(!checked)}
       className={cn(
         "relative h-[18px] w-[32px] min-h-[18px] min-w-[32px] shrink-0 rounded-full transition-colors",
-        checked ? "bg-primary" : "bg-muted",
+        checked ? "bg-primary/60" : "bg-muted",
         disabled && "opacity-50 cursor-not-allowed"
       )}
     >
@@ -3863,23 +3863,6 @@ function Phase3Screen() {
       >
         {isPanel1Open && (
           <>
-            <PanelHeader className="px-3 py-2">
-              <div className="w-full flex items-center justify-between gap-2">
-                <div>
-                  <p className="text-[13px] font-medium">패널1</p>
-                  <p className="text-[11px] text-muted-foreground">데이터</p>
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-xs"
-                  onClick={() => setIsDataPanelCollapsed(true)}
-                  aria-label="패널1 접기"
-                >
-                  <ChevronsLeft />
-                </Button>
-              </div>
-            </PanelHeader>
             <PanelBody className="px-3 py-2">
               <div className="space-y-2">
                 <div className="rounded-sm border border-border p-2">
@@ -4535,40 +4518,30 @@ function Phase3Screen() {
       >
         {isPanel23Open && (
           <>
-            <PanelHeader className="px-3 py-2">
-              <div className="w-full flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 min-w-0">
-                  {!isPanel1Open && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-xs"
-                      onClick={() => setIsDataPanelCollapsed(false)}
-                      aria-label="패널1 펼치기"
-                    >
-                      <ChevronsRight />
-                    </Button>
-                  )}
-                  <div>
-                    <p className="text-[13px] font-medium">패널2/3</p>
-                    <p className="text-[11px] text-muted-foreground">시리즈 / 스타일</p>
-                  </div>
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-xs"
-                  onClick={() => setIsConfigCollapsed(true)}
-                  aria-label="패널2/3 접기"
-                >
-                  <ChevronsLeft />
-                </Button>
-              </div>
-            </PanelHeader>
             <PanelBody className="px-3 py-2">
               <Tabs value={sideTab} onValueChange={(value) => setSideTab(value as "series" | "style")}>
                 <div className="space-y-1.5 pb-2">
-                  <Label className="text-xs">차트 선택</Label>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs">차트 선택</Label>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-xs"
+                        onClick={() => setIsDataPanelCollapsed(!isDataPanelCollapsed)}
+                      >
+                        {isPanel1Open ? <ChevronsLeft /> : <ChevronsRight />}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-xs"
+                        onClick={() => setIsConfigCollapsed(true)}
+                      >
+                        <ChevronsLeft />
+                      </Button>
+                    </div>
+                  </div>
                   <Select value={activeBlock.chartType} onValueChange={(value) => handleActiveChartTypeChange(value as ChartType)}>
                     <SelectTrigger size="sm" className="w-full h-8 text-xs">
                       <SelectValue placeholder="차트 타입 선택" />
@@ -4671,7 +4644,7 @@ function Phase3Screen() {
                 onClick={() => setActiveChartId(block.id)}
                 className={cn(
                   "text-left rounded-sm border px-2 py-1.5 transition-colors",
-                  block.id === activeBlock.id ? "border-primary bg-primary/5" : "border-border hover:bg-accent/50"
+                  block.id === activeBlock.id ? "border-primary/60 bg-primary/5" : "border-border hover:bg-accent/50"
                 )}
               >
                 <p className="text-xs font-medium">{block.title}</p>

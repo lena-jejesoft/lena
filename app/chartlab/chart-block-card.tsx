@@ -18,7 +18,6 @@ interface ChartBlock {
   chartType: ChartType;
   style: ChartStyle;
   data: ChartData;
-  collapsed: boolean;
 }
 
 type LegendControlProps = {
@@ -66,7 +65,6 @@ export function ChartBlockCard({
   block,
   isActive,
   onActivate,
-  onToggleCollapse,
   onTitleChange,
   onChartTypeChange,
   onStyleChange,
@@ -74,7 +72,6 @@ export function ChartBlockCard({
   block: ChartBlock;
   isActive: boolean;
   onActivate: () => void;
-  onToggleCollapse: () => void;
   onTitleChange: (title: string) => void;
   onChartTypeChange: (type: ChartType) => void;
   onStyleChange: (style: ChartStyle) => void;
@@ -192,7 +189,7 @@ export function ChartBlockCard({
     <div
       className={cn(
         "border rounded-lg overflow-hidden shrink-0 transition-all",
-        isActive ? "border-primary bg-card" : "border-border bg-card",
+        isActive ? "border-primary/60 bg-card" : "border-border bg-card",
       )}
       onClick={onActivate}
     >
@@ -254,27 +251,14 @@ export function ChartBlockCard({
           </div>
         )}
 
-        <div className="flex items-center gap-1 shrink-0">
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            className="text-xs text-muted-foreground hover:text-foreground"
-            onClick={(e) => { e.stopPropagation(); onToggleCollapse(); }}
-            title={block.collapsed ? "펼치기" : "접기"}
-          >
-            {block.collapsed ? "▶" : "▼"}
-          </Button>
-        </div>
       </div>
 
-      {/* Block body: sidebar + chart */}
-      {!block.collapsed && (
-        <div className="flex flex-row w-full" style={{ minHeight: 300 }}>
-          <div className="flex-1 min-w-0 w-full">
-            <ChartBlockCardBody />
-          </div>
+      {/* Block body: chart */}
+      <div className="flex flex-row w-full" style={{ minHeight: 300 }}>
+        <div className="flex-1 min-w-0 w-full">
+          <ChartBlockCardBody />
         </div>
-      )}
+      </div>
     </div>
   );
 }
