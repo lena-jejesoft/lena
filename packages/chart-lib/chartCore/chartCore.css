@@ -78,25 +78,25 @@
   }
 
   .dark .chart-core-scope {
-    --background: 0 0% 7%;
+    --background: 240 14% 14%;
     --foreground: 0 0% 98%;
-    --card: 0 0% 10%;
+    --card: 240 12% 18%;
     --card-foreground: 0 0% 98%;
-    --popover: 0 0% 10%;
+    --popover: 240 12% 18%;
     --popover-foreground: 0 0% 98%;
-    --primary: 20 75% 60%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 15%;
+    --primary: 0 71% 85%;
+    --primary-foreground: 0 0% 10%;
+    --secondary: 240 11% 22%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 18%;
+    --muted: 240 11% 22%;
     --muted-foreground: 0 0% 63.9%;
-    --accent: 20 20% 20%;
+    --accent: 240 10% 22%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 18%;
-    --input: 0 0% 18%;
-    --ring: 20 75% 60%;
+    --border: 240 10% 27%;
+    --input: 240 10% 27%;
+    --ring: 0 71% 85%;
     --chart-1: 38 71% 75%;
     --chart-2: 158 26% 55%;
     --chart-3: 15 50% 70%;
