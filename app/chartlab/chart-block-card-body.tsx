@@ -1758,13 +1758,13 @@ function Phase3Screen() {
     []
   )
   const compatibleTypes = useMemo(() => {
-    if (activeBlock.id === EMPTY_BLOCK.id) return []
+    if (!activeBlock) return []
     const baseType = isOhlcChartData(activeBlock.data) ? "lightweight/candles" : activeBlock.chartType
     return getCompatibleChartTypes(baseType, activeBlock.data.xAxisType, allowedChartTypes)
   }, [activeBlock, allowedChartTypes])
   const compatibleTypeSet = useMemo(() => new Set(compatibleTypes), [compatibleTypes])
   const chartTypeOptionsForControl = useMemo(() => {
-    if (activeBlock.id === EMPTY_BLOCK.id) return CHART_TYPE_OPTIONS
+    if (!activeBlock) return CHART_TYPE_OPTIONS
     if (CHART_TYPE_OPTIONS.some((option) => option.value === activeBlock.chartType)) {
       return CHART_TYPE_OPTIONS
     }
@@ -1779,7 +1779,7 @@ function Phase3Screen() {
     ]
   }, [activeBlock])
   const activeChartTypeOption = useMemo(() => {
-    if (activeBlock.id === EMPTY_BLOCK.id) return null
+    if (!activeBlock) return null
     return (
       chartTypeOptionsForControl.find((option) => option.value === activeBlock.chartType) ??
       {
@@ -1848,7 +1848,7 @@ function Phase3Screen() {
     )
   }, [])
   const handleActiveChartTypeChange = useCallback((nextType: ChartType) => {
-    if (activeBlock.id === EMPTY_BLOCK.id || nextType === activeBlock.chartType) return
+    if (!activeBlock || nextType === activeBlock.chartType) return
     // 타입만 교체해 업로드/결합 데이터와 스타일 상태를 그대로 유지한다.
     setBlocks((prev) =>
       prev.map((block) => {
@@ -2121,7 +2121,7 @@ function Phase3Screen() {
       const nextTitle = `${companyLabel} 지표 비교`
       const nextDescription = `${resolveCoreType(targetChartType)} · 계층 선택 · ${chartData.series.length}개 시리즈`
 
-      if (activeBlock.id === EMPTY_BLOCK.id) {
+      if (!activeBlock) {
         const newBlockId = `blend-${Date.now()}`
         setBlocks((prev) => [
           ...prev,
@@ -2319,7 +2319,7 @@ function Phase3Screen() {
           }
           : derivedChartData
 
-      if (activeBlock.id === EMPTY_BLOCK.id) {
+      if (!activeBlock) {
         const newBlockId = `blend-${Date.now()}`
         setBlocks((prev) => [
           ...prev,
@@ -3699,7 +3699,7 @@ function Phase3Screen() {
       const nextTitle = `${resolvedCompanyName} ${selectedMetric.label}`
       const nextDescription = `${resolveCoreType(nextChartType)} · ${formatQuickPeriodType(selectedPeriod)} · 최근 ${parsedIntent.lookbackYears}년`
 
-      if (activeBlock.id === EMPTY_BLOCK.id) {
+      if (!activeBlock) {
         const newBlockId = `blend-${Date.now()}`
         setBlocks((prev) => [
           ...prev,
@@ -3809,7 +3809,7 @@ function Phase3Screen() {
       const targetChartType = activeBlock?.chartType ?? "recharts/line"
       const nextTitle = `단일 데이터 (${singleSource.fileName})`
       const nextDescription = `${resolveCoreType(targetChartType)} · 단일 데이터 · ${descriptionDetail}`
-      if (activeBlock.id === EMPTY_BLOCK.id) {
+      if (!activeBlock) {
         const newBlockId = `blend-${Date.now()}`
         setBlocks((prev) => [
           ...prev,
@@ -3865,7 +3865,7 @@ function Phase3Screen() {
       const targetChartType = activeBlock?.chartType ?? "recharts/line"
       const nextTitle = `OHLC 오버레이 (${uploadedA.fileName} + ${uploadedB.fileName})`
       const nextDescription = `${resolveCoreType(targetChartType)} · OHLC 오버레이`
-      if (activeBlock.id === EMPTY_BLOCK.id) {
+      if (!activeBlock) {
         const newBlockId = `blend-${Date.now()}`
         setBlocks((prev) => [
           ...prev,
@@ -3933,7 +3933,7 @@ function Phase3Screen() {
       const targetChartType = activeBlock?.chartType ?? "recharts/line"
       const nextTitle = `시리즈 병합 결과 (${uploadedA.fileName} + ${uploadedB.fileName})`
       const nextDescription = `${resolveCoreType(targetChartType)} · ${JOIN_TYPE_LABELS[joinType]} · X: ${appendResolvedXKey} · Y: ${appendSelectedYKeys.join(", ")}`
-      if (activeBlock.id === EMPTY_BLOCK.id) {
+      if (!activeBlock) {
         const newBlockId = `blend-${Date.now()}`
         setBlocks((prev) => [
           ...prev,
@@ -4027,7 +4027,7 @@ function Phase3Screen() {
     const targetChartType = activeBlock?.chartType ?? "recharts/line"
     const nextTitle = `혼합 결과 (${uploadedA.fileName} + ${uploadedB.fileName})`
     const nextDescription = `${resolveCoreType(targetChartType)} · ${JOIN_TYPE_LABELS[joinType]} · X: ${joinResolvedXKey} · Y: ${joinSelectedYKeys.join(", ")}`
-    if (activeBlock.id === EMPTY_BLOCK.id) {
+    if (!activeBlock) {
       const newBlockId = `blend-${Date.now()}`
       setBlocks((prev) => [
         ...prev,
@@ -4094,7 +4094,7 @@ function Phase3Screen() {
 
   useEffect(() => {
     // 미지원/비정상 상태에서는 표시 플래그를 자동 정리해 이후 상태 오염을 막는다.
-    if (activeBlock.id === EMPTY_BLOCK.id) return
+    if (!activeBlock) return
     if (canShowOutliers || !chartState.showOutliers) return
     setShowOutliers(activeBlock.id, false)
   }, [activeBlock, canShowOutliers, chartState.showOutliers, setShowOutliers])
@@ -4193,7 +4193,7 @@ function Phase3Screen() {
                   <SeriesAdditionPanel
                     activeBlock={activeBlock}
                     onUpdateBlock={(data, title, description) => {
-                      if (activeBlock.id === EMPTY_BLOCK.id) return
+                      if (!activeBlock) return
                       setBlocks((prev) =>
                         prev.map((block) => {
                           if (block.id !== activeBlock.id) return block
