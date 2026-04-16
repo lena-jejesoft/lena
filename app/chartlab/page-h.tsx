@@ -277,105 +277,11 @@ const LEGEND_PANEL_SUPPORTED_TYPES = new Set<LegendPanelChartType>([
 const SAMPLE_BLOCKS: BlendedChartBlock[] = [
   {
     id: "chart-1",
-    title: "매출/영업이익 추이",
-    description: "chartCore/line",
+    title: "새 차트",
+    description: "",
     chartType: "chartCore/line",
-    data: {
-      xAxisType: "category",
-      series: [
-        {
-          id: "revenue",
-          name: "매출",
-          data: [
-            { x: "2024-Q1", y: 120 },
-            { x: "2024-Q2", y: 130 },
-            { x: "2024-Q3", y: 122 },
-            { x: "2024-Q4", y: 480 },
-            { x: "2025-Q1", y: 138 },
-            { x: "2025-Q2", y: 142 },
-          ],
-        },
-        {
-          id: "operating_profit",
-          name: "영업이익",
-          data: [
-            { x: "2024-Q1", y: 18 },
-            { x: "2024-Q2", y: 21 },
-            { x: "2024-Q3", y: 20 },
-            { x: "2024-Q4", y: 11 },
-            { x: "2025-Q1", y: 24 },
-            { x: "2025-Q2", y: 25 },
-          ],
-        },
-        {
-          id: "net_income",
-          name: "당기순이익",
-          data: [
-            { x: "2024-Q1", y: 10 },
-            { x: "2024-Q2", y: 12 },
-            { x: "2024-Q3", y: 11 },
-            { x: "2024-Q4", y: -62 },
-            { x: "2025-Q1", y: 13 },
-            { x: "2025-Q2", y: 14 },
-          ],
-        },
-      ],
-    },
-    style: {
-      legend: { position: "none" },
-      tooltip: { shared: true },
-      colorPalette: BASE_PALETTE,
-      chartCore: { showOutliers: true },
-      timepointLine: { showOutliers: true },
-    },
-  },
-  {
-    id: "chart-2",
-    title: "지역별 점유율",
-    description: "recharts/treemap",
-    chartType: "recharts/treemap",
-    data: {
-      xAxisType: "category",
-      series: [
-        {
-          id: "korea",
-          name: "Korea",
-          data: [
-            { x: "2024", y: 38 },
-            { x: "2025", y: 42 },
-          ],
-        },
-        {
-          id: "us",
-          name: "US",
-          data: [
-            { x: "2024", y: 30 },
-            { x: "2025", y: 27 },
-          ],
-        },
-        {
-          id: "europe",
-          name: "Europe",
-          data: [
-            { x: "2024", y: 22 },
-            { x: "2025", y: 21 },
-          ],
-        },
-        {
-          id: "asia_etc",
-          name: "Asia ETC",
-          data: [
-            { x: "2024", y: 10 },
-            { x: "2025", y: 10 },
-          ],
-        },
-      ],
-    },
-    style: {
-      legend: { position: "none" },
-      tooltip: { shared: true },
-      colorPalette: BASE_PALETTE,
-    },
+    data: { xAxisType: "category", series: [] },
+    style: { legend: { position: "none" }, tooltip: { shared: true }, colorPalette: BASE_PALETTE },
   },
 ]
 
