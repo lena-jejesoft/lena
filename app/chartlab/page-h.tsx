@@ -274,6 +274,15 @@ const LEGEND_PANEL_SUPPORTED_TYPES = new Set<LegendPanelChartType>([
   "radar",
 ])
 
+const EMPTY_BLOCK: BlendedChartBlock = {
+  id: "__empty__",
+  title: "",
+  description: "",
+  chartType: "chartCore/line",
+  data: { xAxisType: "category", series: [] },
+  style: { legend: { position: "none" }, tooltip: { shared: true }, colorPalette: BASE_PALETTE },
+}
+
 function parseQuickChartType(value: string): ChartType | null {
   const normalized = value.toLowerCase()
   if (/바\s*차트|막대|bar/.test(normalized)) return "bar"
@@ -1747,7 +1756,7 @@ function Phase3Screen() {
   }, [quickInputDialogOpen, quickInputValue])
 
   const activeBlock = useMemo(
-    () => blocks.find((block) => block.id === activeChartId) ?? blocks[0],
+    () => blocks.find((block) => block.id === activeChartId) ?? blocks[0] ?? EMPTY_BLOCK,
     [activeChartId, blocks]
   )
   const isPanel1Open = !isDataPanelCollapsed
@@ -4036,8 +4045,6 @@ function Phase3Screen() {
     if (canShowOutliers || !chartState.showOutliers) return
     setShowOutliers(activeBlock.id, false)
   }, [activeBlock, canShowOutliers, chartState.showOutliers, setShowOutliers])
-
-  if (!activeBlock) return null
 
   return (
     <Page direction="horizontal" className="relative h-screen">
