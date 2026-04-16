@@ -804,6 +804,25 @@ export default function ChartLabPage() {
     setActiveBlockId(block.id);
   }, []);
 
+  const removeBlock = useCallback((id: number) => {
+    setBlocks((prev) => prev.filter((b) => b.id !== id));
+    setActiveBlockId((prev) => (prev === id ? null : prev));
+  }, []);
+
+  const duplicateBlock = useCallback((id: number) => {
+    setBlocks((prev) => {
+      const idx = prev.findIndex((b) => b.id === id);
+      if (idx === -1) return prev;
+      const src = prev[idx];
+      const dup = createChartBlock(src.chartType, `${src.title} (복사)`);
+      dup.style = { ...src.style };
+      dup.data = { ...src.data };
+      const next = [...prev];
+      next.splice(idx + 1, 0, dup);
+      return next;
+    });
+  }, []);
+
   const toggleCollapse = useCallback((id: number) => {
     setBlocks((prev) =>
       prev.map((b) => (b.id === id ? { ...b, collapsed: !b.collapsed } : b))
@@ -859,6 +878,8 @@ export default function ChartLabPage() {
               isActive={activeBlockId === block.id}
               onActivate={() => setActiveBlockId(block.id)}
               onToggleCollapse={() => toggleCollapse(block.id)}
+              onDuplicate={() => duplicateBlock(block.id)}
+              onDelete={() => removeBlock(block.id)}
               onTitleChange={(title) => updateBlock(block.id, { title })}
               onChartTypeChange={(type) => handleChartTypeChange(block.id, type)}
               onStyleChange={(style) => updateBlock(block.id, { style })}

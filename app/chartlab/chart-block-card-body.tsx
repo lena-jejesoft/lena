@@ -291,6 +291,111 @@ const LEGEND_PANEL_SUPPORTED_TYPES = new Set<LegendPanelChartType>([
   "radar",
 ])
 
+const SAMPLE_BLOCKS: BlendedChartBlock[] = [
+  {
+    id: "chart-1",
+    title: "매출/영업이익 추이",
+    description: "chartCore/line",
+    chartType: "chartCore/line",
+    data: {
+      xAxisType: "category",
+      series: [
+        {
+          id: "revenue",
+          name: "매출",
+          data: [
+            { x: "2024-Q1", y: 120 },
+            { x: "2024-Q2", y: 130 },
+            { x: "2024-Q3", y: 122 },
+            { x: "2024-Q4", y: 480 },
+            { x: "2025-Q1", y: 138 },
+            { x: "2025-Q2", y: 142 },
+          ],
+        },
+        {
+          id: "operating_profit",
+          name: "영업이익",
+          data: [
+            { x: "2024-Q1", y: 18 },
+            { x: "2024-Q2", y: 21 },
+            { x: "2024-Q3", y: 20 },
+            { x: "2024-Q4", y: 11 },
+            { x: "2025-Q1", y: 24 },
+            { x: "2025-Q2", y: 25 },
+          ],
+        },
+        {
+          id: "net_income",
+          name: "당기순이익",
+          data: [
+            { x: "2024-Q1", y: 10 },
+            { x: "2024-Q2", y: 12 },
+            { x: "2024-Q3", y: 11 },
+            { x: "2024-Q4", y: -62 },
+            { x: "2025-Q1", y: 13 },
+            { x: "2025-Q2", y: 14 },
+          ],
+        },
+      ],
+    },
+    style: {
+      legend: { position: "none" },
+      tooltip: { shared: true },
+      colorPalette: BASE_PALETTE,
+      chartCore: { showOutliers: true },
+      timepointLine: { showOutliers: true },
+    },
+  },
+  {
+    id: "chart-2",
+    title: "지역별 점유율",
+    description: "recharts/treemap",
+    chartType: "recharts/treemap",
+    data: {
+      xAxisType: "category",
+      series: [
+        {
+          id: "korea",
+          name: "Korea",
+          data: [
+            { x: "2024", y: 38 },
+            { x: "2025", y: 42 },
+          ],
+        },
+        {
+          id: "us",
+          name: "US",
+          data: [
+            { x: "2024", y: 30 },
+            { x: "2025", y: 27 },
+          ],
+        },
+        {
+          id: "europe",
+          name: "Europe",
+          data: [
+            { x: "2024", y: 22 },
+            { x: "2025", y: 21 },
+          ],
+        },
+        {
+          id: "asia_etc",
+          name: "Asia ETC",
+          data: [
+            { x: "2024", y: 10 },
+            { x: "2025", y: 10 },
+          ],
+        },
+      ],
+    },
+    style: {
+      legend: { position: "none" },
+      tooltip: { shared: true },
+      colorPalette: BASE_PALETTE,
+    },
+  },
+]
+
 function parseQuickChartType(value: string): ChartType | null {
   const normalized = value.toLowerCase()
   if (/바\s*차트|막대|bar/.test(normalized)) return "bar"
@@ -1587,7 +1692,7 @@ function SeriesPanelContent({
 function Phase3Screen() {
   const { ensureChartState, getChartState, setShowOutliers } = useBlendedChartViewContext()
   const supabase = useMemo(() => createClient(), [])
-  const [activeChartId, setActiveChartId] = useState<string>("")
+  const [activeChartId, setActiveChartId] = useState<string>(SAMPLE_BLOCKS[0]?.id ?? "")
   const [sideTab, setSideTab] = useState<"data" | "series" | "style">("data")
   const [isSidePanelCollapsed, setIsSidePanelCollapsed] = useState(false)
   const [showSemanticMappingPanel, setShowSemanticMappingPanel] = useState(true)
@@ -1666,7 +1771,7 @@ function Phase3Screen() {
   const [joinKey, setJoinKey] = useState("")
   const [blendMessage, setBlendMessage] = useState<string | null>(null)
   const [joinPreview, setJoinPreview] = useState<JoinPreview | null>(null)
-  const [blocks, setBlocks] = useState<BlendedChartBlock[]>([])
+  const [blocks, setBlocks] = useState<BlendedChartBlock[]>(SAMPLE_BLOCKS)
   const [legendStateByChartId, setLegendStateByChartId] = useState<Record<string, BlendedLegendState>>({})
   const [chartCoreLegendContainer, setChartCoreLegendContainer] = useState<HTMLElement | null>(null)
   const [chartTypeSelectOpen, setChartTypeSelectOpen] = useState(false)
@@ -4472,6 +4577,22 @@ function Phase3Screen() {
           </div>
         </PanelHeader>
         <PanelBody className="space-y-2 px-3 py-2">
+          <div className="flex flex-wrap gap-1.5">
+            {blocks.map((block) => (
+              <button
+                key={block.id}
+                type="button"
+                onClick={() => setActiveChartId(block.id)}
+                className={cn(
+                  "text-left rounded-sm border px-2 py-1.5 transition-colors",
+                  block.id === activeBlock.id ? "border-primary bg-primary/5" : "border-border hover:bg-accent/50"
+                )}
+              >
+                <p className="text-xs font-medium">{block.title}</p>
+              </button>
+            ))}
+          </div>
+
           <div
             className={cn(
               "relative rounded-sm border",

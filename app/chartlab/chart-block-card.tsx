@@ -67,6 +67,8 @@ export function ChartBlockCard({
   isActive,
   onActivate,
   onToggleCollapse,
+  onDuplicate,
+  onDelete,
   onTitleChange,
   onChartTypeChange,
   onStyleChange,
@@ -75,6 +77,8 @@ export function ChartBlockCard({
   isActive: boolean;
   onActivate: () => void;
   onToggleCollapse: () => void;
+  onDuplicate: () => void;
+  onDelete: () => void;
   onTitleChange: (title: string) => void;
   onChartTypeChange: (type: ChartType) => void;
   onStyleChange: (style: ChartStyle) => void;
@@ -263,6 +267,24 @@ export function ChartBlockCard({
             title={block.collapsed ? "펼치기" : "접기"}
           >
             {block.collapsed ? "▶" : "▼"}
+          </Button>
+          <Button
+            variant="ghost"
+            size="xs"
+            className="text-xs text-muted-foreground hover:text-foreground"
+            onClick={(e) => { e.stopPropagation(); onDuplicate(); }}
+            title="복제"
+          >
+            복제
+          </Button>
+          <Button
+            variant="ghost"
+            size="xs"
+            className="text-xs text-destructive hover:text-destructive/80"
+            onClick={(e) => { e.stopPropagation(); onDelete(); }}
+            title="삭제"
+          >
+            삭제
           </Button>
         </div>
       </div>
