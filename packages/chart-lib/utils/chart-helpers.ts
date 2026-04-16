@@ -1,5 +1,8 @@
-import type { ChartCoreLegendMeta, ChartData, ChartStyle, ChartType, OHLCPoint } from "@/packages/chart-lib/types"
-import type { ChartType as LegendPanelChartType } from "@/packages/chart-lib/recharts-core/recharts-type"
+import type { ChartBlock, ChartCoreLegendMeta, ChartData, ChartStyle, ChartType, OHLCPoint } from "@/packages/chart-lib/types"
+import type { ChartType as LegendPanelChartType, ExtendedDataAnalysisResult } from "@/packages/chart-lib/recharts-core/recharts-type"
+import { analyzeDataQualityExtended } from "@/packages/chart-lib/recharts-core/recharts-adapter"
+import { supportsOutliers } from "@/packages/chart-lib/chartCore/src/types/chart-type-config"
+import { chartColors } from "@/lib/colors"
 
 export type AnalysisRow = {
   date: string
@@ -148,4 +151,70 @@ export function getLegendStateSignature(state: {
     hoveredLabel: state.hoveredLabel ?? null,
     treemapStats: state.treemapStats ?? null,
   })
+}
+
+export const BASE_PALETTE = chartColors
+
+export function hasRenderableSeries(block: ChartBlock): boolean {
+  if (block.data.series.length === 0) return false
+  return block.data.series.some((series) => series.data.length > 0)
+}
+
+export function isOutlierSupported(block: ChartBlock): boolean {
+  return supportsOutliers(resolveCoreType(block.chartType))
+}
+
+export function getOutlierCount(block: ChartBlock): number {
+  if (!isOutlierSupported(block)) return 0
+  const { rows, fields } = toSeriesRows(block.data)
+  if (rows.length === 0 || fields.length === 0) return 0
+  return analyzeDataQualityExtended(rows as any, fields, fields).outliers.length
+}
+
+export function getSeriesDisplayColors(block: ChartBlock, seriesColorOverrides: Record<string, string>): Record<string, string> {
+  const basePalette = block.style.colorPalette?.length ? block.style.colorPalette : BASE_PALETTE
+  const colorMap: Record<string, string> = {}
+
+  block.data.series.forEach((series, index) => {
+    const fallback = series.color ?? basePalette[index % basePalette.length] ?? BASE_PALETTE[0]
+    colorMap[series.id] = seriesColorOverrides[series.id] ?? fallback
+  })
+
+  return colorMap
+}
+
+export function getAnalysisResultForSeries(block: ChartBlock): ExtendedDataAnalysisResult | null {
+  const { rows, fields } = toSeriesRows(block.data)
+  if (rows.length === 0 || fields.length === 0) return null
+  return analyzeDataQualityExtended(rows as any, fields, fields)
+}
+
+export function applyViewStateToStyle(
+  block: ChartBlock,
+  showOutliers: boolean,
+  showTooltip: boolean,
+  seriesColorOverrides: Record<string, string>
+): ChartStyle {
+  const colorMap = getSeriesDisplayColors(block, seriesColorOverrides)
+  const palette = block.data.series
+    .map((series) => colorMap[series.id])
+    .filter((color): color is string => Boolean(color))
+
+  return {
+    ...block.style,
+    colorPalette: palette.length > 0 ? palette : block.style.colorPalette,
+    legend: { position: "none" },
+    tooltip: {
+      ...(block.style.tooltip ?? {}),
+      shared: showTooltip,
+    },
+    chartCore: {
+      ...(block.style.chartCore ?? {}),
+      showOutliers,
+    },
+    timepointLine: {
+      ...(block.style as any).timepointLine,
+      showOutliers,
+    },
+  } as ChartStyle
 }

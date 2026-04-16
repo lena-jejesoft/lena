@@ -128,6 +128,13 @@ export interface ChartData {
   xAxisType: XAxisType;
 }
 
+export interface ChartBlock {
+  id: string;
+  chartType: ChartType;
+  data: ChartData;
+  style: ChartStyle;
+}
+
 // ─── Style ───
 
 export interface YAxisStyle {

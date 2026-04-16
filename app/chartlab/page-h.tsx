@@ -11,7 +11,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DataChart } from "@/packages/chart-lib/DataChart"
 import type { CartesianStyle, ChartCoreLegendMeta, ChartData, ChartStyle, ChartType, OHLCPoint, Scenario } from "@/packages/chart-lib/types"
 import { getCompatibleChartTypes } from "@/packages/chart-lib/registry"
-import { analyzeDataQualityExtended } from "@/packages/chart-lib/recharts-core/recharts-adapter"
 import { ChartLegendPanel } from "@/packages/chart-lib/recharts-core/chartTool/chart-legend-panel"
 import type { ChartType as LegendPanelChartType, ExtendedDataAnalysisResult } from "@/packages/chart-lib/recharts-core/recharts-type"
 import {
@@ -29,8 +28,15 @@ import {
   getEnabledSeriesMap,
   getChartCoreLegendMetaSignature,
   getLegendStateSignature,
+  BASE_PALETTE,
+  hasRenderableSeries,
+  isOutlierSupported,
+  getOutlierCount,
+  getSeriesDisplayColors,
+  getAnalysisResultForSeries,
+  applyViewStateToStyle,
 } from "@/packages/chart-lib/utils/chart-helpers"
-import { supportsOutliers } from "@/packages/chart-lib/chartCore/src/types/chart-type-config"
+import type { ChartBlock } from "@/packages/chart-lib/types"
 import { createClient } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
 import { ChevronsLeft, ChevronsRight } from "lucide-react"
@@ -99,15 +105,10 @@ import {
   recommendQuickInputFromMock,
   type QuickInputRecommendation,
 } from "./page-h-quick-input-recommender"
-import { chartColors } from "@/lib/colors"
 
-type BlendedChartBlock = {
-  id: string
+type BlendedChartBlock = ChartBlock & {
   title: string
   description: string
-  chartType: ChartType
-  data: ChartData
-  style: ChartStyle
 }
 
 type BlendedLegendState = {
@@ -187,8 +188,6 @@ type UploadAxisSelection = {
 
 type BlendSemanticMappingBySlot = Record<UploadSlotId, BlendSemanticMapping>
 type BlendSemanticField = keyof BlendSemanticMapping
-
-const BASE_PALETTE = chartColors
 
 const JOIN_TYPE_LABELS: Record<JoinType, string> = {
   append: "시리즈 병합 (A+B)",
@@ -664,71 +663,6 @@ function resolveDimensionForMetric(
     return preferred
   }
   return metric.dimensions[0] as PageHDbDimensionKey
-}
-
-function hasRenderableSeries(block: BlendedChartBlock): boolean {
-  if (block.data.series.length === 0) return false
-  return block.data.series.some((series) => series.data.length > 0)
-}
-
-function isOutlierSupported(block: BlendedChartBlock): boolean {
-  return supportsOutliers(resolveCoreType(block.chartType))
-}
-
-function getOutlierCount(block: BlendedChartBlock): number {
-  if (!isOutlierSupported(block)) return 0
-  const { rows, fields } = toSeriesRows(block.data)
-  if (rows.length === 0 || fields.length === 0) return 0
-  return analyzeDataQualityExtended(rows as any, fields, fields).outliers.length
-}
-
-function getSeriesDisplayColors(block: BlendedChartBlock, seriesColorOverrides: Record<string, string>): Record<string, string> {
-  const basePalette = block.style.colorPalette?.length ? block.style.colorPalette : BASE_PALETTE
-  const colorMap: Record<string, string> = {}
-
-  block.data.series.forEach((series, index) => {
-    const fallback = series.color ?? basePalette[index % basePalette.length] ?? BASE_PALETTE[0]
-    colorMap[series.id] = seriesColorOverrides[series.id] ?? fallback
-  })
-
-  return colorMap
-}
-
-function getAnalysisResultForSeries(block: BlendedChartBlock): ExtendedDataAnalysisResult | null {
-  const { rows, fields } = toSeriesRows(block.data)
-  if (rows.length === 0 || fields.length === 0) return null
-  return analyzeDataQualityExtended(rows as any, fields, fields)
-}
-
-function applyViewStateToStyle(
-  block: BlendedChartBlock,
-  showOutliers: boolean,
-  showTooltip: boolean,
-  seriesColorOverrides: Record<string, string>
-): ChartStyle {
-  const colorMap = getSeriesDisplayColors(block, seriesColorOverrides)
-  const palette = block.data.series
-    .map((series) => colorMap[series.id])
-    .filter((color): color is string => Boolean(color))
-
-  return {
-    ...block.style,
-    colorPalette: palette.length > 0 ? palette : block.style.colorPalette,
-    // 범례는 우상단 커스텀 오버레이로 통일해 이중 노출을 방지한다.
-    legend: { position: "none" },
-    tooltip: {
-      ...(block.style.tooltip ?? {}),
-      shared: showTooltip,
-    },
-    chartCore: {
-      ...(block.style.chartCore ?? {}),
-      showOutliers,
-    },
-    timepointLine: {
-      ...(block.style as any).timepointLine,
-      showOutliers,
-    },
-  } as ChartStyle
 }
 
 function ToggleSwitch({
