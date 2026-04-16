@@ -51,8 +51,8 @@ import type {
   PageHDbQueryMode,
 } from "./page-h-db"
 import type { BlendedChartViewState } from "./page-h-types"
-import { CHART_TYPE_OPTIONS, type ChartTypeOption } from "./chart-type-options"
-import { ChartTypeIcon, inferChartTypeIconKey } from "./chart-type-icon"
+import { CHART_TYPE_OPTIONS, type ChartTypeOption } from "@/packages/chart-lib/chart-type-options"
+import { ChartTypeIcon, inferChartTypeIconKey } from "@/packages/chart-lib/chart-type-icon"
 import {
   fetchCompanyMetricCatalog,
   fetchCompanyMetricRows,

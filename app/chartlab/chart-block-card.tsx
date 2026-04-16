@@ -9,7 +9,7 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@
 import { setChartTheme } from "@/packages/chart-lib/recharts-core/recharts-wrapper";
 import type { ChartType as LegendChartType } from "@/packages/chart-lib/recharts-core/recharts-type";
 import { AlertTriangle, CircleDot } from "lucide-react";
-import { CHART_TYPE_OPTIONS } from "./chart-type-options";
+import { CHART_TYPE_OPTIONS } from "@/packages/chart-lib/chart-type-options";
 import ChartBlockCardBody from "./chart-block-card-body";
 
 interface ChartBlock {

@@ -50,7 +50,7 @@ import type {
   PageHDbQueryMode,
 } from "./page-h-db"
 import type { BlendedChartViewState } from "./page-h-types"
-import { CHART_TYPE_OPTIONS } from "./chart-type-options"
+import { CHART_TYPE_OPTIONS } from "@/packages/chart-lib/chart-type-options"
 import {
   fetchCompanyMetricCatalog,
   fetchCompanyMetricRows,
