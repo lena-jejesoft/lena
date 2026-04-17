@@ -145,12 +145,18 @@ export function RechartsRegressionScatterWrapper({
 
   // 0으로 끝나는 tick 배열 생성
   const generateNiceTicks = (min: number, max: number) => {
+    if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min) return [];
+
     const range = max - min;
     let step = 10;
     if (range >= 500) step = 100;
     else if (range >= 100) step = 20;
     else if (range >= 50) step = 10;
     else step = 10;
+
+    // range가 너무 크면 step을 자릿수에 맞춰 스케일 업 (tick 상한 유지)
+    const MAX_TICKS = 50;
+    while (range / step > MAX_TICKS) step *= 10;
 
     const ticks: number[] = [];
     const start = Math.ceil(min / step) * step;
