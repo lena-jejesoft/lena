@@ -263,10 +263,10 @@ const SAMPLE_BLOCKS: BlendedChartBlock[] = [
 
 function parseQuickChartType(value: string): ChartType | null {
   const normalized = value.toLowerCase()
-  if (/바\s*차트|막대|bar/.test(normalized)) return "bar"
-  if (/라인|선\s*차트|line/.test(normalized)) return "line"
-  if (/영역|area/.test(normalized)) return "area"
-  if (/파이|원형|pie/.test(normalized)) return "pie"
+  if (/바\s*차트|막대|bar/.test(normalized)) return "chartCore/column"
+  if (/라인|선\s*차트|line/.test(normalized)) return "chartCore/line"
+  if (/영역|area/.test(normalized)) return "chartCore/area"
+  if (/파이|원형|pie/.test(normalized)) return "chartCore/pie"
   return null
 }
 
@@ -2523,8 +2523,9 @@ function Phase3Screen() {
           const nextPeriodMode = parsedByApi.periodMode && ["auto", "yearly", "quarterly", "monthly", "daily"].includes(parsedByApi.periodMode)
             ? parsedByApi.periodMode
             : parsedIntent.periodMode
-          const nextChartType = parsedByApi.chartType && ["bar", "line", "area", "pie", "column"].includes(parsedByApi.chartType)
-            ? parsedByApi.chartType
+          const apiChartTypeMap: Record<string, ChartType> = { bar: "chartCore/column", line: "chartCore/line", area: "chartCore/area", pie: "chartCore/pie", column: "chartCore/column" }
+          const nextChartType = parsedByApi.chartType && parsedByApi.chartType in apiChartTypeMap
+            ? apiChartTypeMap[parsedByApi.chartType]
             : parsedIntent.chartType
 
           parsedIntent = {
@@ -2810,7 +2811,7 @@ function Phase3Screen() {
         throw new Error("숫자형 데이터가 없어 차트를 만들 수 없습니다.")
       }
 
-      const nextChartType = parsedIntent.chartType ?? activeBlock?.chartType ?? "bar"
+      const nextChartType = parsedIntent.chartType ?? activeBlock?.chartType ?? "chartCore/column"
       const nextChartData: ChartData = {
         xAxisType: "category",
         series: [

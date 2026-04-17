@@ -213,7 +213,7 @@ export function documentChartToChartData(chart: DocumentChartDef): {
     }));
 
     return {
-      chartType: "pie",
+      chartType: "chartCore/pie",
       data: {
         xAxisType: "category",
         series: [{ id: "main", name: title, data: pieData }],
@@ -252,7 +252,7 @@ export function documentChartToChartData(chart: DocumentChartDef): {
     }));
 
     return {
-      chartType: "column",
+      chartType: "chartCore/column",
       data: { xAxisType: "category", series: compSeries },
       style: { title, legend: { position: "bottom" } } as ChartStyle,
     };

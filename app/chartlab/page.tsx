@@ -732,7 +732,7 @@ function getDefaultStyleForChartType(chartType: ChartType, previousStyle?: Chart
 
 let nextBlockId = 1;
 
-function createChartBlock(chartType: ChartType = "line", title?: string): ChartBlock {
+function createChartBlock(chartType: ChartType = "chartCore/line", title?: string): ChartBlock {
   const id = nextBlockId++;
   return {
     id,

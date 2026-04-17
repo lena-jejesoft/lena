@@ -80,16 +80,15 @@ const DEFAULT_INTENT: IntentInput = {
   entityName: "카카오",
   metricName: "매출액",
   lookbackYears: 5,
-  chartType: "column",
+  chartType: "chartCore/column",
 };
 
 const PERIOD_PRIORITY: PeriodType[] = ["yearly", "quarterly", "monthly", "daily"];
 
 const CHART_TYPE_OPTIONS: Array<{ value: ChartType; label: string }> = [
-  { value: "bar", label: "Bar" },
-  { value: "column", label: "Column" },
-  { value: "line", label: "Line" },
-  { value: "area", label: "Area" },
+  { value: "chartCore/column", label: "Column" },
+  { value: "chartCore/line", label: "Line" },
+  { value: "chartCore/area", label: "Area" },
 ];
 
 const PERIOD_OPTIONS: Array<{ value: PeriodMode; label: string }> = [
