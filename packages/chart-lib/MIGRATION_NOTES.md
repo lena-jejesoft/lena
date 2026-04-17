@@ -49,9 +49,17 @@ app 쪽 `BlendedChartBlock`은 `ChartBlock & { title: string; description: strin
 
 ---
 
-## 3단계: 컴포넌트 이동 (다음 세션)
+## 3단계: 컴포넌트 이동
 
 `StylePanelContent`와 `SeriesPanelContent`를 `app/chartlab/` → `packages/chart-lib/`로 이동.
+
+### 3-1: SeriesPanelContent 이동 (완료, 04-17)
+
+- `packages/chart-lib/panels/SeriesPanel.tsx` 생성
+- `BlendedChartBlock` → `ChartBlock` 타입으로 일반화
+- `chartState: BlendedChartViewState` → `seriesColors: Record<string, string>` 개별 prop으로 분해
+- page-h.tsx, chart-block-card-body.tsx 두 동일 복사본 → import로 교체
+- 미사용 import 정리 (`ChartLegendPanel`, `LegendPanelChartType`, `ExtendedDataAnalysisResult`)
 
 ### 현재 위치
 
