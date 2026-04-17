@@ -3948,21 +3948,23 @@ function Phase3Screen() {
           </div>
         </PanelHeader>
         <PanelBody className="space-y-2 px-3 py-2">
-          <div className="flex flex-wrap gap-1.5">
-            {blocks.map((block) => (
-              <button
-                key={block.id}
-                type="button"
-                onClick={() => setActiveChartId(block.id)}
-                className={cn(
-                  "text-left rounded-sm border px-2 py-1.5 transition-colors",
-                  block.id === activeBlock.id ? "border-primary/60 bg-primary/5" : "border-border hover:bg-accent/50"
-                )}
-              >
-                <p className="text-xs font-medium">{block.title}</p>
-              </button>
-            ))}
-          </div>
+          {blocks.length > 1 && (
+            <div className="flex flex-wrap gap-1.5">
+              {blocks.map((block) => (
+                <button
+                  key={block.id}
+                  type="button"
+                  onClick={() => setActiveChartId(block.id)}
+                  className={cn(
+                    "text-left rounded-sm border px-2 py-1.5 transition-colors",
+                    block.id === activeBlock.id ? "border-primary/60 bg-primary/5" : "border-border hover:bg-accent/50"
+                  )}
+                >
+                  <p className="text-xs font-medium">{block.title}</p>
+                </button>
+              ))}
+            </div>
+          )}
 
           <div
             className={cn(
