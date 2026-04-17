@@ -8,7 +8,7 @@ export type ChartTypeOption = {
 };
 
 export const CHART_TYPE_OPTIONS: ChartTypeOption[] = [
-  { value: "line", label: "Line", iconKey: "line" },
+  { value: "line", label: "Line (Highcharts)", iconKey: "line" },
   { value: "highcharts/gauge", label: "Highcharts / Gauge", iconKey: "gauge" },
   { value: "core/grid", label: "Core / Grid", iconKey: "grid" },
   { value: "core/insider-trading", label: "Core / Insider Trading", iconKey: "insider-trading" },
@@ -57,9 +57,9 @@ export const CHART_TYPE_OPTIONS: ChartTypeOption[] = [
   // { value: "recharts/synced-area", label: "Recharts/동기화 영역" },
   // { value: "recharts/regression-scatter", label: "Recharts/회귀 산점도" },
   { value: "recharts/radar", label: "Radar", iconKey: "radar" },
-  { value: "area", label: "Area", iconKey: "area" },
-  { value: "column", label: "Column", iconKey: "column" },
-  { value: "bar", label: "Bar", iconKey: "bar" },
-  { value: "pie", label: "Pie", iconKey: "pie" },
-  { value: "scatter", label: "Scatter", iconKey: "scatter" },
+  { value: "area", label: "Area (Highcharts)", iconKey: "area" },
+  { value: "column", label: "Column (Highcharts)", iconKey: "column" },
+  { value: "bar", label: "Bar (Highcharts)", iconKey: "bar" },
+  { value: "pie", label: "Pie (Highcharts)", iconKey: "pie" },
+  { value: "scatter", label: "Scatter (Highcharts)", iconKey: "scatter" },
 ];
