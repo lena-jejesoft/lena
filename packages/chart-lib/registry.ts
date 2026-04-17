@@ -41,20 +41,6 @@ export type ChartTypeSpec =
   | ChartCoreChartTypeSpec;
 
 export const CHART_TYPE_REGISTRY: Record<ChartType, ChartTypeSpec> = {
-  line: {
-    pointType: "cartesian",
-    xAxisTypes: ["datetime", "category", "numeric"],
-    label: "Line chart",
-    renderer: "highcharts",
-    highchartsType: "line",
-  },
-  "highcharts/gauge": {
-    pointType: "cartesian",
-    xAxisTypes: [],
-    label: "Highcharts/게이지",
-    renderer: "highcharts",
-    highchartsType: "gauge",
-  },
   "core/grid": {
     pointType: "cartesian",
     xAxisTypes: [],
@@ -181,103 +167,11 @@ export const CHART_TYPE_REGISTRY: Record<ChartType, ChartTypeSpec> = {
     label: "ChartCore/회귀 산점도",
     renderer: "chartcore",
   },
-  area: {
-    pointType: "cartesian",
-    xAxisTypes: ["datetime", "category", "numeric"],
-    label: "Area chart",
-    renderer: "highcharts",
-    highchartsType: "area",
-  },
-  "stacked-area": {
-    pointType: "cartesian",
-    xAxisTypes: ["datetime", "category"],
-    label: "Stacked area",
-    renderer: "highcharts",
-    highchartsType: "area",
-  },
-  "100-stacked-area": {
-    pointType: "cartesian",
-    xAxisTypes: ["datetime", "category"],
-    label: "100% stacked area",
-    renderer: "highcharts",
-    highchartsType: "area",
-  },
-  column: {
-    pointType: "cartesian",
-    xAxisTypes: ["datetime", "category", "numeric"],
-    label: "Column chart",
-    renderer: "highcharts",
-    highchartsType: "column",
-  },
-  "stacked-column": {
-    pointType: "cartesian",
-    xAxisTypes: ["category"],
-    label: "Stacked column",
-    renderer: "highcharts",
-    highchartsType: "column",
-  },
-  "100-stacked-column": {
-    pointType: "cartesian",
-    xAxisTypes: ["category"],
-    label: "100% stacked column",
-    renderer: "highcharts",
-    highchartsType: "column",
-  },
-  bar: {
-    pointType: "cartesian",
-    xAxisTypes: ["category"],
-    label: "Bar chart",
-    renderer: "highcharts",
-    highchartsType: "bar",
-  },
-  "stacked-bar": {
-    pointType: "cartesian",
-    xAxisTypes: ["category"],
-    label: "Stacked bar",
-    renderer: "highcharts",
-    highchartsType: "bar",
-  },
-  "100-stacked-bar": {
-    pointType: "cartesian",
-    xAxisTypes: ["category"],
-    label: "100% stacked bar",
-    renderer: "highcharts",
-    highchartsType: "bar",
-  },
-  candlestick: {
-    pointType: "ohlc",
-    xAxisTypes: ["datetime"],
-    label: "Candlestick",
-    renderer: "highcharts",
-    highchartsType: "candlestick",
-    usesStock: true,
-  },
   "lightweight/candles": {
     pointType: "ohlc",
     xAxisTypes: ["datetime"],
     label: "Lightweight/캔들",
     renderer: "lightweight",
-  },
-  scatter: {
-    pointType: "cartesian",
-    xAxisTypes: ["numeric"],
-    label: "Scatterplot",
-    renderer: "highcharts",
-    highchartsType: "scatter",
-  },
-  pie: {
-    pointType: "cartesian",
-    xAxisTypes: [],
-    label: "Pie chart",
-    renderer: "highcharts",
-    highchartsType: "pie",
-  },
-  histogram: {
-    pointType: "cartesian",
-    xAxisTypes: ["numeric"],
-    label: "Histogram",
-    renderer: "highcharts",
-    highchartsType: "histogram",
   },
   waterfall: {
     pointType: "cartesian",
@@ -455,10 +349,12 @@ export function getCompatibleChartTypes(
   allowed?: ChartType[]
 ): ChartType[] {
   const currentSpec = CHART_TYPE_REGISTRY[currentType];
+  if (!currentSpec) return [];
   const pool = allowed ?? (Object.keys(CHART_TYPE_REGISTRY) as ChartType[]);
 
   return pool.filter((t) => {
     const spec = CHART_TYPE_REGISTRY[t];
+    if (!spec) return false;
     // Must share the same point type family
     if (spec.pointType !== currentSpec.pointType) return false;
     // Target must support the current xAxisType (pie/waterfall have empty xAxisTypes — always ok)
@@ -490,14 +386,6 @@ export interface StyleOptionSpec {
 }
 
 export const CHART_STYLE_OPTIONS: Record<ChartType, StyleOptionSpec> = {
-  line: {
-    styleType: "cartesian",
-    options: ["colorPalette", "lineWidth", "markerEnabled", "yAxes", "legend", "tooltip"],
-  },
-  "highcharts/gauge": {
-    styleType: "cartesian",
-    options: ["colorPalette", "legend", "tooltip"],
-  },
   "core/grid": {
     styleType: "cartesian",
     options: [],
@@ -682,61 +570,9 @@ export const CHART_STYLE_OPTIONS: Record<ChartType, StyleOptionSpec> = {
     styleType: "cartesian",
     options: ["colorPalette", "legend", "tooltip"],
   },
-  area: {
-    styleType: "cartesian",
-    options: ["colorPalette", "lineWidth", "yAxes", "legend", "tooltip"],
-  },
-  "stacked-area": {
-    styleType: "cartesian",
-    options: ["colorPalette", "lineWidth", "yAxes", "legend", "tooltip"],
-  },
-  "100-stacked-area": {
-    styleType: "cartesian",
-    options: ["colorPalette", "lineWidth", "yAxes", "legend", "tooltip"],
-  },
-  column: {
-    styleType: "cartesian",
-    options: ["colorPalette", "dataLabels", "yAxes", "legend", "tooltip"],
-  },
-  "stacked-column": {
-    styleType: "cartesian",
-    options: ["colorPalette", "dataLabels", "yAxes", "legend", "tooltip"],
-  },
-  "100-stacked-column": {
-    styleType: "cartesian",
-    options: ["colorPalette", "dataLabels", "yAxes", "legend", "tooltip"],
-  },
-  bar: {
-    styleType: "cartesian",
-    options: ["colorPalette", "dataLabels", "yAxes", "legend", "tooltip"],
-  },
-  "stacked-bar": {
-    styleType: "cartesian",
-    options: ["colorPalette", "dataLabels", "yAxes", "legend", "tooltip"],
-  },
-  "100-stacked-bar": {
-    styleType: "cartesian",
-    options: ["colorPalette", "dataLabels", "yAxes", "legend", "tooltip"],
-  },
-  candlestick: {
-    styleType: "cartesian",
-    options: ["yAxes", "tooltip"],
-  },
   "lightweight/candles": {
     styleType: "cartesian",
     options: ["yAxes", "tooltip"],
-  },
-  scatter: {
-    styleType: "cartesian",
-    options: ["colorPalette", "markerEnabled", "yAxes", "legend", "tooltip"],
-  },
-  pie: {
-    styleType: "pie",
-    options: ["colorPalette", "innerRadius", "dataLabels", "showPercentage", "legend"],
-  },
-  histogram: {
-    styleType: "cartesian",
-    options: ["colorPalette", "dataLabels", "yAxes", "legend", "tooltip"],
   },
   waterfall: {
     styleType: "waterfall",

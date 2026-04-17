@@ -8,13 +8,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-const CHART_TYPES = ["line", "column", "pie", "area", "scatter"];
+const CHART_TYPES = [
+  "chartCore/line",
+  "chartCore/column",
+  "chartCore/pie",
+  "chartCore/area",
+  "chartCore/regression-scatter",
+];
 
 export default function NewChartPage() {
   const router = useRouter();
   const supabase = createClient();
   const [title, setTitle] = useState("");
-  const [chartType, setChartType] = useState("line");
+  const [chartType, setChartType] = useState("chartCore/line");
   const [isPublic, setIsPublic] = useState(false);
   const [saving, setSaving] = useState(false);
 

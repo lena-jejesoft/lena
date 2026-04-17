@@ -41,7 +41,7 @@ type ChartTypeIconProps = {
 export function inferChartTypeIconKey(chartType: ChartType): ChartTypeIconKey {
   const value = String(chartType)
 
-  if (value === "candlestick" || value.includes("candles")) return "candles"
+  if (value.includes("candles")) return "candles"
   if (value.includes("gauge")) return "gauge"
   if (value.includes("grid")) return "grid"
   if (value.includes("insider")) return "insider-trading"

@@ -134,7 +134,7 @@ export function stockDataToChartData(
       color: INDICATOR_COLORS[key],
       yAxisId: meta.yAxisId,
       visible: options.seriesVisibility[key] !== false,
-      chartType: isColumn ? "column" : undefined,
+      chartType: isColumn ? "chartCore/column" : undefined,
       dashStyle: isColumn ? undefined : "ShortDash",
       opacity: isColumn ? 0.7 : undefined,
     });
@@ -259,7 +259,7 @@ export function documentChartToChartData(chart: DocumentChartDef): {
   }
 
   // column / line / default
-  const resolvedType: ChartType = type === "line" ? "line" : "column";
+  const resolvedType: ChartType = type === "line" ? "chartCore/line" : "chartCore/column";
   const points: CartesianPoint[] = (data ?? []).map((d) => ({
     x: d.name,
     y: d.y,

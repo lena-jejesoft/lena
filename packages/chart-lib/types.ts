@@ -49,23 +49,8 @@ export type ChartCoreChartType =
   | "chartCore/regression-scatter";
 
 export type ChartType =
-  | "line"
-  | "highcharts/gauge"
   | "core/grid"
   | "core/insider-trading"
-  | "area"
-  | "stacked-area"
-  | "100-stacked-area"
-  | "column"
-  | "stacked-column"
-  | "100-stacked-column"
-  | "bar"
-  | "stacked-bar"
-  | "100-stacked-bar"
-  | "candlestick"
-  | "scatter"
-  | "pie"
-  | "histogram"
   | "waterfall"
   | "lightweight/candles"
   | RechartsChartType

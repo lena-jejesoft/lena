@@ -12,8 +12,6 @@ const ChartRenderer = dynamic(
 );
 
 const ALL_CHART_TYPES = [
-  "line", "area", "column", "bar", "pie", "scatter",
-  "highcharts/gauge",
   "core/grid",
   "core/insider-trading",
   "chartCore/line",
@@ -35,7 +33,7 @@ const ALL_CHART_TYPES = [
   "chartCore/ranking-bar",
   "chartCore/geo-grid",
   "chartCore/regression-scatter",
-  "candlestick", "waterfall", "histogram",
+  "waterfall",
   "lightweight/candles",
   "recharts/line",
   "recharts/column",
@@ -62,9 +60,6 @@ const ALL_CHART_TYPES = [
   "recharts/regression-scatter",
   "recharts/stacked-grouped",
   "recharts/radar",
-  "stacked-area", "100-stacked-area",
-  "stacked-column", "100-stacked-column",
-  "stacked-bar", "100-stacked-bar",
 ] as const;
 
 const DEFAULT_STYLE: ChartStyle = {

@@ -7,7 +7,6 @@ import type {
   ChartStyle,
   ChartTimeRange,
   CartesianPoint,
-  OHLCPoint,
   CartesianStyle,
   PieStyle,
   WaterfallStyle,
@@ -20,7 +19,6 @@ import { CHART_TYPE_REGISTRY } from "./registry";
 import type { HighchartsChartTypeSpec } from "./registry";
 import { RechartsRenderer } from './recharts-core/RechartsRenderer';
 import { LightweightCandlesRenderer } from "./lightweight-charts/candles";
-import { HighchartsGaugeRenderer } from "./highchart/HighchartsGaugeRenderer";
 import { CoreGridRenderer } from "./core/CoreGridRenderer";
 import { CoreInsiderTradingRenderer } from "./core/CoreInsiderTradingRenderer";
 import { ChartCoreRenderer } from "./chartCore/ChartCoreRenderer";
@@ -66,10 +64,6 @@ export function ChartRenderer({
   onChartCoreLegendMetaChange,
 }: ChartRendererProps) {
   const chartSpec = CHART_TYPE_REGISTRY[chartType];
-
-  if (chartType === "highcharts/gauge") {
-    return <HighchartsGaugeRenderer data={data} style={style} height={height} />;
-  }
 
   if (!chartSpec) {
     return (
@@ -269,7 +263,6 @@ function buildHighchartsConfig(
     return buildWaterfallConfig(data, style as WaterfallStyle | undefined, colors, chartHeight);
   }
 
-  // All cartesian-family charts (line, area, column, bar, scatter, candlestick, histogram)
   return buildCartesianConfig(
     data,
     chartType,
@@ -464,7 +457,6 @@ function buildCartesianConfig(
     credits: { enabled: false },
   };
 
-  // Stock chart extras (applied for candlestick or any datetime chart)
   if (isStock) {
     config.rangeSelector = {
       enabled: false,
@@ -490,20 +482,6 @@ function convertSeriesData(
   hcType: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): any[] {
-  if (hcType === "candlestick") {
-    return (series.data as OHLCPoint[]).map((p) => [p.x, p.open, p.high, p.low, p.close]);
-  }
-
-  if (hcType === "scatter") {
-    return (series.data as CartesianPoint[]).map((p) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const pt: any = { x: p.x, y: p.y };
-      if (p.color) pt.color = p.color;
-      if (p.size) pt.marker = { radius: p.size };
-      return pt;
-    });
-  }
-
   // arearange (linked forecast range)
   if (hcType === "arearange") {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

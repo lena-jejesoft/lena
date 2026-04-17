@@ -629,7 +629,6 @@ function generateDemoData(chartType: ChartType): ChartData {
   }
 
   if (
-    chartType === "highcharts/gauge" ||
     chartType === "recharts/line" ||
     chartType === "recharts/column" ||
     chartType === "recharts/area" ||
@@ -663,23 +662,6 @@ function generateDemoData(chartType: ChartType): ChartData {
     return {
       xAxisType: "category",
       series: toSeriesData({ useAbs }),
-    };
-  }
-
-  if (chartType === "pie") {
-    return {
-      xAxisType: "category",
-      series: [{
-        id: "pie-1",
-        name: "비중",
-        data: [
-          { x: "A 항목", y: 35 },
-          { x: "B 항목", y: 25 },
-          { x: "C 항목", y: 20 },
-          { x: "D 항목", y: 12 },
-          { x: "E 항목", y: 8 },
-        ] as CartesianPoint[],
-      }],
     };
   }
 
@@ -749,7 +731,7 @@ export default function ChartLabPage() {
   const supabase = useMemo(() => createClient(), []);
 
   // Chart blocks (center panel editing)
-  const [blocks, setBlocks] = useState<ChartBlock[]>(() => [createChartBlock("line", "샘플 차트")]);
+  const [blocks, setBlocks] = useState<ChartBlock[]>(() => [createChartBlock("chartCore/line", "샘플 차트")]);
   const [activeBlockId, setActiveBlockId] = useState<number | null>(null);
 
   const [samsungOhlcvData, setSamsungOhlcvData] = useState<ChartData | null>(null);
