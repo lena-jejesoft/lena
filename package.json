@@ -49,8 +49,6 @@
     "fancy-canvas": "2.1.0",
     "fast-xml-parser": "^5.3.4",
     "genkit": "^1.28.0",
-    "highcharts": "^12.5.0",
-    "highcharts-react-official": "^3.2.3",
     "lightweight-charts": "^5.1.0",
     "lucide-react": "^0.563.0",
     "mongodb": "^7.1.0",

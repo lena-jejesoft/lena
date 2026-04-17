@@ -4004,7 +4004,6 @@ function Phase3Screen() {
 
       <style jsx global>{`
         .blended-tooltip-off .recharts-tooltip-wrapper,
-        .blended-tooltip-off .highcharts-tooltip,
         .blended-tooltip-off [data-state][role="tooltip"],
         .blended-tooltip-off [role="tooltip"] {
           display: none !important;

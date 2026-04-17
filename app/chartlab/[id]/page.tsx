@@ -67,7 +67,7 @@ export default function ChartDetailPage() {
 
       <div className="flex-1 overflow-y-auto p-4">
         <div className="flex items-center justify-center h-[400px] bg-card border border-border rounded-lg text-muted-foreground/60 text-sm">
-          차트 편집기는 Highcharts 연동 후 활성화됩니다
+          차트 편집기는 추후 활성화됩니다
         </div>
 
         <div className="mt-5">

@@ -8,13 +8,7 @@ export interface ChartTypeSpecBase {
   pointType: PointFamily;
   xAxisTypes: ("datetime" | "category" | "numeric")[];
   label: string;
-  renderer: "highcharts" | "recharts" | "lightweight" | "core" | "chartcore";
-}
-
-export interface HighchartsChartTypeSpec extends ChartTypeSpecBase {
-  renderer: "highcharts";
-  highchartsType: string; // mapped Highcharts series type
-  usesStock?: boolean; // needs highcharts/highstock module
+  renderer: "recharts" | "lightweight" | "core" | "chartcore";
 }
 
 export interface RechartsChartTypeSpec extends ChartTypeSpecBase {
@@ -34,7 +28,6 @@ export interface ChartCoreChartTypeSpec extends ChartTypeSpecBase {
 }
 
 export type ChartTypeSpec =
-  | HighchartsChartTypeSpec
   | RechartsChartTypeSpec
   | LightweightChartTypeSpec
   | CoreChartTypeSpec
@@ -172,13 +165,6 @@ export const CHART_TYPE_REGISTRY: Record<ChartType, ChartTypeSpec> = {
     xAxisTypes: ["datetime"],
     label: "Lightweight/캔들",
     renderer: "lightweight",
-  },
-  waterfall: {
-    pointType: "cartesian",
-    xAxisTypes: ["category"],
-    label: "Waterfall",
-    renderer: "highcharts",
-    highchartsType: "waterfall",
   },
 
   "recharts/line": {
@@ -357,7 +343,7 @@ export function getCompatibleChartTypes(
     if (!spec) return false;
     // Must share the same point type family
     if (spec.pointType !== currentSpec.pointType) return false;
-    // Target must support the current xAxisType (pie/waterfall have empty xAxisTypes — always ok)
+    // Target must support the current xAxisType (empty xAxisTypes — always ok)
     if (spec.xAxisTypes.length > 0 && !spec.xAxisTypes.includes(xAxisType)) return false;
     return true;
   });
@@ -375,13 +361,10 @@ export type StyleOptionKey =
   | "legend"
   | "tooltip"
   | "innerRadius"
-  | "showPercentage"
-  | "positiveColor"
-  | "negativeColor"
-  | "sumColor";
+  | "showPercentage";
 
 export interface StyleOptionSpec {
-  styleType: "cartesian" | "pie" | "waterfall";
+  styleType: "cartesian" | "pie";
   options: StyleOptionKey[];
 }
 
@@ -574,10 +557,6 @@ export const CHART_STYLE_OPTIONS: Record<ChartType, StyleOptionSpec> = {
     styleType: "cartesian",
     options: ["yAxes", "tooltip"],
   },
-  waterfall: {
-    styleType: "waterfall",
-    options: ["positiveColor", "negativeColor", "sumColor", "dataLabels", "legend", "tooltip"],
-  },
 };
 
 // ─── Style option labels (for sidebar/modal UI) ───
@@ -593,7 +572,4 @@ export const STYLE_OPTION_LABELS: Record<StyleOptionKey, string> = {
   tooltip: "툴팁",
   innerRadius: "내부 반지름",
   showPercentage: "퍼센트 표시",
-  positiveColor: "양수 색상",
-  negativeColor: "음수 색상",
-  sumColor: "합계 색상",
 };

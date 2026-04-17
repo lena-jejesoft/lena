@@ -19,7 +19,7 @@ const COLORS: string[] = [
 ];
 
 function isBarType(t: ChartType | undefined): boolean {
-  return t === "chartCore/column" || t === "waterfall";
+  return t === "chartCore/column";
 }
 
 function quantile(values: number[], q: number): number {

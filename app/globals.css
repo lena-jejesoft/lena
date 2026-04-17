@@ -217,55 +217,6 @@ a {
   scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
 
-/* Highcharts custom overrides */
-.highcharts-button-box {
-  fill: var(--bg-light);
-}
-
-.highcharts-button text {
-  fill: var(--text-secondary) !important;
-  font-weight: 300 !important;
-}
-
-.highcharts-button-pressed .highcharts-button-box {
-  fill: var(--claude-orange) !important;
-}
-
-.highcharts-button-pressed text {
-  fill: #fff !important;
-}
-
-.highcharts-exporting-group {
-  transform: scale(0.6);
-  transform-origin: top right;
-  opacity: 0.4;
-  transition: opacity 0.2s;
-}
-
-.highcharts-exporting-group:hover {
-  opacity: 0.8;
-}
-
-.highcharts-button-symbol {
-  stroke: var(--text-muted) !important;
-  stroke-width: 1.5px !important;
-}
-
-.highcharts-menu {
-  background: var(--bg-light) !important;
-  border: 1px solid var(--border-color) !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
-}
-
-.highcharts-menu-item {
-  color: var(--text-secondary) !important;
-  font-size: 11px !important;
-}
-
-.highcharts-menu-item:hover {
-  background: var(--bg-hover) !important;
-  color: var(--claude-orange) !important;
-}
 
 /* Hierarchy tree: hide native disclosure marker */
 .hierarchy-tree > summary {

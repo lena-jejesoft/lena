@@ -1,6 +1,6 @@
 "use client";
 
-import type { ChartType, ChartStyle, CartesianStyle, PieStyle, WaterfallStyle } from "./types";
+import type { ChartType, ChartStyle, CartesianStyle, PieStyle } from "./types";
 import { CHART_STYLE_OPTIONS } from "./registry";
 
 const selectClass =
@@ -166,29 +166,6 @@ export function StyleTab({ chartType, style, onStyleChange }: StyleTabProps) {
         </Section>
       )}
 
-      {options.includes("positiveColor") && (
-        <Section title="Waterfall 색상">
-          <ColorField
-            label="양수"
-            value={(style as WaterfallStyle).positiveColor ?? "#4ECDC4"}
-            onChange={(v) => update({ positiveColor: v } as Partial<WaterfallStyle>)}
-          />
-          {options.includes("negativeColor") && (
-            <ColorField
-              label="음수"
-              value={(style as WaterfallStyle).negativeColor ?? "#FF6B6B"}
-              onChange={(v) => update({ negativeColor: v } as Partial<WaterfallStyle>)}
-            />
-          )}
-          {options.includes("sumColor") && (
-            <ColorField
-              label="합계"
-              value={(style as WaterfallStyle).sumColor ?? "#E57B53"}
-              onChange={(v) => update({ sumColor: v } as Partial<WaterfallStyle>)}
-            />
-          )}
-        </Section>
-      )}
     </div>
   );
 }
@@ -240,6 +217,5 @@ function getFirstYAxisPosition(style: ChartStyle): "left" | "right" {
 
 function getDataLabels(style: ChartStyle, styleType: string): boolean {
   if (styleType === "pie") return (style as PieStyle).dataLabels !== false;
-  if (styleType === "waterfall") return (style as WaterfallStyle).dataLabels ?? false;
   return (style as CartesianStyle).dataLabels ?? false;
 }

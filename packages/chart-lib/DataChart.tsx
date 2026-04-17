@@ -33,7 +33,6 @@ const ALL_CHART_TYPES = [
   "chartCore/ranking-bar",
   "chartCore/geo-grid",
   "chartCore/regression-scatter",
-  "waterfall",
   "lightweight/candles",
   "recharts/line",
   "recharts/column",

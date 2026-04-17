@@ -51,7 +51,6 @@ export type ChartCoreChartType =
 export type ChartType =
   | "core/grid"
   | "core/insider-trading"
-  | "waterfall"
   | "lightweight/candles"
   | RechartsChartType
   | ChartCoreChartType;
@@ -60,8 +59,7 @@ export type ChartType =
 
 /**
  * Unified point type for all non-OHLC charts.
- * pie  → x=name (string), y=value
- * waterfall → x=name (string), y=value, isSum/isIntermediateSum
+ * pie → x=name (string), y=value
  * scatter → size for bubble radius
  * Others → x=number|string, y=number
  */
@@ -70,11 +68,7 @@ export interface CartesianPoint {
   y: number;
   label?: string;
   color?: string;
-  // scatter
   size?: number;
-  // waterfall
-  isSum?: boolean;
-  isIntermediateSum?: boolean;
 }
 
 export interface OHLCPoint {
@@ -268,19 +262,7 @@ export interface GeoGridStyle extends ChartStyleBase {
   };
 }
 
-export interface WaterfallStyle extends ChartStyleBase {
-  positiveColor?: string;
-  negativeColor?: string;
-  sumColor?: string;
-  dataLabels?: boolean;
-  xAxis?: {
-    title?: string;
-    gridLines?: boolean;
-  };
-  yAxes?: YAxisStyle[];
-}
-
-export type ChartStyle = CartesianStyle | PieStyle | TreemapStyle | GeoGridStyle | WaterfallStyle;
+export type ChartStyle = CartesianStyle | PieStyle | TreemapStyle | GeoGridStyle;
 
 // ─── Chart Time Range (compatible with existing) ───
 

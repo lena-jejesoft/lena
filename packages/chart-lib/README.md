@@ -2,7 +2,7 @@
 
 65종 이상의 차트를 렌더링하는 React 컴포넌트 라이브러리.
 `<DataChart>` 하나에 `data`와 `chartType`만 넘기면 동작한다.
-내부적으로 Highcharts, Recharts, Lightweight Charts 3개 렌더러를 차트 유형에 따라 자동 라우팅한다.
+내부적으로 Recharts, Lightweight Charts 2개 렌더러(+ 내부 chartCore/core 구현)를 차트 유형에 따라 자동 라우팅한다.
 
 ## 제약사항
 
@@ -14,7 +14,6 @@
 | React | 19.x | |
 | Tailwind CSS | 4.x | `@tailwindcss/postcss` |
 | shadcn/ui | — | `Input`, `Button`, `Select`, `Popover`, `Tabs` 등 |
-| Highcharts | 12.x | line, area, column, pie, waterfall 등 |
 | Recharts | 2.x | grouped-bar, sankey, radar, gauge 등 |
 | Lightweight Charts | 5.x | candlestick (`lightweight/candles`) |
 
@@ -65,7 +64,7 @@ your-project/
 차트 렌더링 엔진 (필수):
 
 ```bash
-npm install highcharts@^12.5.0 recharts@^2.15.4 lightweight-charts@^5.1.0
+npm install recharts@^2.15.4 lightweight-charts@^5.1.0
 ```
 
 호스트 앱에 아직 없다면 아래도 함께 필요하다:
@@ -131,17 +130,6 @@ export default function MyChart() {
 
 UI에서 선택 가능한 활성 차트 유형 목록.
 
-### 기본
-
-| 차트 유형 | 레이블 | 렌더러 |
-|---|---|---|
-| `line` | Line | Highcharts |
-| `area` | Area | Highcharts |
-| `column` | Column | Highcharts |
-| `bar` | Bar | Highcharts |
-| `pie` | Pie | Highcharts |
-| `scatter` | Scatter | Highcharts |
-
 ### ChartCore
 
 | 차트 유형 | 레이블 |
@@ -182,7 +170,6 @@ UI에서 선택 가능한 활성 차트 유형 목록.
 
 | 차트 유형 | 레이블 | 렌더러 |
 |---|---|---|
-| `highcharts/gauge` | Highcharts / Gauge | Highcharts |
 | `lightweight/candles` | Candlestick | Lightweight Charts |
 | `core/grid` | Core / Grid | Core |
 | `core/insider-trading` | Core / Insider Trading | Core |

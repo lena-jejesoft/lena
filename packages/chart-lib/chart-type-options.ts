@@ -36,6 +36,5 @@ export const CHART_TYPE_OPTIONS: ChartTypeOption[] = [
   { value: "recharts/sankey-diagram", label: "Sankey Diagram", iconKey: "sankey" },
   { value: "recharts/dual-axis-stacked-bar", label: "Dual Axis Stacked Bar (Recharts)", iconKey: "dual-axis-stacked-bar" },
   { value: "recharts/radar", label: "Radar", iconKey: "radar" },
-  { value: "waterfall", label: "Waterfall", iconKey: "column" },
   { value: "lightweight/candles", label: "Candlestick", iconKey: "candles" },
 ];
