@@ -465,12 +465,12 @@ export function ChartLegendPanel({
               <SelectContent>
                 {seriesFields.map((field) => (
                   <SelectItem key={field} value={field}>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
                       <span
                         className="w-2 h-2 rounded-full flex-shrink-0"
                         style={{ backgroundColor: seriesColors[seriesFields.indexOf(field) % seriesColors.length] }}
                       />
-                      {getSeriesLabel(field)}
+                      <span className="truncate">{getSeriesLabel(field)}</span>
                     </div>
                   </SelectItem>
                 ))}
@@ -486,12 +486,12 @@ export function ChartLegendPanel({
               <SelectContent>
                 {seriesFields.map((field) => (
                   <SelectItem key={field} value={field}>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
                       <span
                         className="w-2 h-2 rounded-full flex-shrink-0"
                         style={{ backgroundColor: seriesColors[seriesFields.indexOf(field) % seriesColors.length] }}
                       />
-                      {getSeriesLabel(field)}
+                      <span className="truncate">{getSeriesLabel(field)}</span>
                     </div>
                   </SelectItem>
                 ))}
@@ -513,12 +513,12 @@ export function ChartLegendPanel({
               <SelectContent>
                 {seriesFields.map((field) => (
                   <SelectItem key={field} value={field}>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
                       <span
                         className="w-2 h-2 rounded-full flex-shrink-0"
                         style={{ backgroundColor: seriesColors[seriesFields.indexOf(field) % seriesColors.length] }}
                       />
-                      {getSeriesLabel(field)}
+                      <span className="truncate">{getSeriesLabel(field)}</span>
                     </div>
                   </SelectItem>
                 ))}
@@ -534,12 +534,12 @@ export function ChartLegendPanel({
               <SelectContent>
                 {seriesFields.map((field) => (
                   <SelectItem key={field} value={field}>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
                       <span
                         className="w-2 h-2 rounded-full flex-shrink-0"
                         style={{ backgroundColor: seriesColors[seriesFields.indexOf(field) % seriesColors.length] }}
                       />
-                      {getSeriesLabel(field)}
+                      <span className="truncate">{getSeriesLabel(field)}</span>
                     </div>
                   </SelectItem>
                 ))}
