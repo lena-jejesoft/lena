@@ -3995,7 +3995,6 @@ function Phase3Screen() {
                 chartCoreGroupColorOverrides={isActiveChartCoreType ? chartState.groupColors : undefined}
                 onChartCoreLegendMetaChange={isActiveChartCoreType ? handleChartCoreLegendMetaChange : undefined}
                 isEmpty={!hasData}
-                emptyMessage="시리즈 데이터가 없어 차트를 렌더링할 수 없습니다."
               />
             </div>
           </div>

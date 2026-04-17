@@ -3594,7 +3594,7 @@ function Phase3Screen() {
       {!isSidePanelOpen && (
         <Button
           type="button"
-          variant="ghost"
+          variant="outline"
           size="icon-xs"
           className="absolute top-2 left-2 z-30"
           onClick={() => setIsSidePanelCollapsed(false)}
@@ -3661,7 +3661,6 @@ function Phase3Screen() {
                 chartCoreGroupColorOverrides={isActiveChartCoreType ? chartState.groupColors : undefined}
                 onChartCoreLegendMetaChange={isActiveChartCoreType ? handleChartCoreLegendMetaChange : undefined}
                 isEmpty={!hasData}
-                emptyMessage="시리즈 데이터가 없어 차트를 렌더링할 수 없습니다."
               />
             </div>
           </div>
