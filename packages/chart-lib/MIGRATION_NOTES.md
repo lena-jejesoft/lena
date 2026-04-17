@@ -61,6 +61,18 @@ app 쪽 `BlendedChartBlock`은 `ChartBlock & { title: string; description: strin
 - page-h.tsx, chart-block-card-body.tsx 두 동일 복사본 → import로 교체
 - 미사용 import 정리 (`ChartLegendPanel`, `LegendPanelChartType`, `ExtendedDataAnalysisResult`)
 
+### 3-2: StylePanelContent + 서브컴포넌트 이동 (완료, 04-17)
+
+- `packages/chart-lib/panels/ToggleRow.tsx` — ToggleSwitch (size="default"|"sm") + ToggleRow
+- `packages/chart-lib/panels/SeriesColorRow.tsx` — SeriesColorRow (full-width) + SeriesColorPopover (compact popover)
+- `packages/chart-lib/panels/CandleTrendColorRow.tsx` — 캔들 상승/하락 색상 설정
+- `packages/chart-lib/panels/GroupColorRow.tsx` — 그룹 색상 설정
+- `packages/chart-lib/panels/StylePanel.tsx` — 통합 StylePanelContent (compact prop으로 card-body 모드 제어)
+- context 의존(`useBlendedChartViewContext`) → 11개 개별 props로 전환
+- page-h.tsx: 인라인 6개 컴포넌트 삭제 (ToggleSwitch, ToggleRow, SeriesColorRow, CandleTrendColorRow, GroupColorRow, StylePanelContent)
+- chart-block-card-body.tsx: 인라인 7개 컴포넌트 삭제 (위 6개 + SeriesColorPopover), `compact` prop으로 호출
+- 양쪽에서 미사용 `normalizeHexColor` 함수, `Popover` import 제거
+
 ### 현재 위치
 
 | 컴포넌트 | page-h.tsx | chart-block-card-body.tsx |

@@ -7,12 +7,12 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DataChart } from "@/packages/chart-lib/DataChart"
 import type { CartesianStyle, ChartCoreLegendMeta, ChartData, ChartStyle, ChartType, OHLCPoint, Scenario } from "@/packages/chart-lib/types"
 import { getCompatibleChartTypes } from "@/packages/chart-lib/registry"
 import { SeriesPanelContent } from "@/packages/chart-lib/panels/SeriesPanel"
+import { StylePanelContent } from "@/packages/chart-lib/panels/StylePanel"
 import {
   type AnalysisRow,
   LINE_LIKE_SERIES_CONTROL_TYPES,
@@ -464,21 +464,6 @@ function formatQuickPeriodType(periodType: MetricDimension): string {
   return "일간"
 }
 
-function normalizeHexColor(value: string): string | null {
-  const trimmed = value.trim()
-  const isValidHex = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(trimmed)
-  if (!isValidHex) return null
-  if (trimmed.length === 7) return trimmed.toUpperCase()
-
-  const expanded = trimmed
-    .slice(1)
-    .split("")
-    .map((char) => `${char}${char}`)
-    .join("")
-
-  return `#${expanded.toUpperCase()}`
-}
-
 function formatFileSize(bytes: number): string {
   if (!Number.isFinite(bytes) || bytes < 0) return "-"
   if (bytes < 1024) return `${bytes}B`
@@ -681,62 +666,6 @@ function resolveDimensionForMetric(
   return metric.dimensions[0] as PageHDbDimensionKey
 }
 
-function ToggleSwitch({
-  checked,
-  disabled,
-  onChange,
-}: {
-  checked: boolean
-  disabled?: boolean
-  onChange: (next: boolean) => void
-}) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      disabled={disabled}
-      onClick={() => onChange(!checked)}
-      className={cn(
-        "relative h-[11px] w-[21px] min-h-[11px] min-w-[21px] shrink-0 rounded-full transition-colors",
-        checked ? "bg-primary/60" : "bg-muted",
-        disabled && "opacity-50 cursor-not-allowed"
-      )}
-    >
-      <span
-        className={cn(
-          "absolute top-[1.5px] left-[1.5px] h-[8px] w-[8px] rounded-full bg-background transition-transform",
-          checked && "translate-x-[10px]"
-        )}
-      />
-    </button>
-  )
-}
-
-function ToggleRow({
-  title,
-  description,
-  checked,
-  disabled,
-  onChange,
-}: {
-  title: string
-  description?: string
-  checked: boolean
-  disabled?: boolean
-  onChange: (next: boolean) => void
-}) {
-  return (
-    <div className="flex items-start justify-between gap-3 rounded-md border border-border px-3 py-2">
-      <div className="space-y-1 min-w-0 flex-1">
-        <p className="text-sm font-medium leading-none">{title}</p>
-        {description && <p className="text-xs text-muted-foreground">{description}</p>}
-      </div>
-      <ToggleSwitch checked={checked} disabled={disabled} onChange={onChange} />
-    </div>
-  )
-}
-
 function ChartLegendOverlay({
   block,
   colorMap,
@@ -790,423 +719,8 @@ function ChartLegendOverlay({
   )
 }
 
-function SeriesColorPopover({
-  block,
-  seriesId,
-}: {
-  block: BlendedChartBlock
-  seriesId: string
-}) {
-  const { getChartState, setSeriesColor, removeSeriesColor } = useBlendedChartViewContext()
-  const chartState = getChartState(block.id)
-  const displayLabel = block.data.series.find((series) => series.id === seriesId)?.name?.trim() || seriesId
-  const colorMap = getSeriesDisplayColors(block, chartState.seriesColors)
-  const displayColor = colorMap[seriesId] ?? BASE_PALETTE[0]
-  const hasOverride = Boolean(chartState.seriesColors[seriesId])
-  const [hexInput, setHexInput] = useState(displayColor)
-
-  useEffect(() => {
-    setHexInput(displayColor)
-  }, [displayColor])
-
-  const applyHexInput = () => {
-    const normalized = normalizeHexColor(hexInput)
-    if (!normalized) {
-      setHexInput(displayColor)
-      return
-    }
-    setSeriesColor(block.id, seriesId, normalized)
-    setHexInput(normalized)
-  }
-
-  return (
-    <Popover>
-      <div className="flex items-center gap-2">
-        <p className="truncate text-[11px] text-muted-foreground">{displayLabel}</p>
-        <PopoverTrigger asChild>
-          <button
-            type="button"
-            className="ml-auto h-4 w-4 shrink-0 rounded-sm border-border cursor-pointer"
-            style={{ backgroundColor: displayColor }}
-            aria-label={`${displayLabel} 색상 선택`}
-          />
-        </PopoverTrigger>
-      </div>
-      <PopoverContent className="w-44 p-2" align="start">
-        <Tabs defaultValue="palette">
-          <TabsList className="w-full mb-2">
-            <TabsTrigger value="palette" className="flex-1 text-xs">팔레트</TabsTrigger>
-            <TabsTrigger value="custom" className="flex-1 text-xs">커스텀</TabsTrigger>
-          </TabsList>
-          <TabsContent value="palette" className="mt-0">
-            <div className="flex flex-wrap gap-1">
-              {BASE_PALETTE.map((color) => (
-                <button
-                  key={`${seriesId}-${color}`}
-                  type="button"
-                  className={cn(
-                    "h-4 w-4 rounded-sm",
-                    displayColor.toLowerCase() === color.toLowerCase()
-                      ? "border-foreground border-2"
-                      : "border-border"
-                  )}
-                  style={{ backgroundColor: color }}
-                  title={color}
-                  onClick={() => setSeriesColor(block.id, seriesId, color)}
-                  aria-label={`${displayLabel} 색상 ${color}`}
-                />
-              ))}
-            </div>
-          </TabsContent>
-          <TabsContent value="custom" className="mt-0 space-y-2">
-            <div className="flex items-center gap-2">
-              <span
-                className="h-8 w-8 shrink-0 rounded-sm border border-border"
-                style={{ backgroundColor: displayColor }}
-              />
-              <Input
-                value={hexInput}
-                onChange={(event) => setHexInput(event.target.value)}
-                onBlur={applyHexInput}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") applyHexInput()
-                }}
-                placeholder="#FFFFFF"
-                className="h-8 text-xs"
-              />
-            </div>
-            {hasOverride && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="xs"
-                className="h-7 w-full"
-                onClick={() => removeSeriesColor(block.id, seriesId)}
-              >
-                커스텀 해제
-              </Button>
-            )}
-          </TabsContent>
-        </Tabs>
-      </PopoverContent>
-    </Popover>
-  )
-}
-
-function CandleTrendColorRow({
-  block,
-  seriesId,
-  fallbackColor,
-  onBlockStyleChange,
-}: {
-  block: BlendedChartBlock
-  seriesId: string
-  fallbackColor: string
-  onBlockStyleChange: (blockId: string, updater: (prev: ChartStyle) => ChartStyle) => void
-}) {
-  const candleSeriesColors = ((block.style as CartesianStyle | undefined)?.lightweightCandles?.candleSeriesColors ?? {})
-  const seriesOverride = candleSeriesColors[seriesId]
-  const displayUpColor = seriesOverride?.up ?? fallbackColor
-  const displayDownColor = seriesOverride?.down ?? fallbackColor
-  const hasOverride = seriesId in candleSeriesColors
-  const [upHexInput, setUpHexInput] = useState(displayUpColor)
-  const [downHexInput, setDownHexInput] = useState(displayDownColor)
-
-  useEffect(() => {
-    setUpHexInput(displayUpColor)
-  }, [displayUpColor])
-
-  useEffect(() => {
-    setDownHexInput(displayDownColor)
-  }, [displayDownColor])
-
-  const setCandleTrendColor = (patch: Partial<{ up: string; down: string }>) => {
-    onBlockStyleChange(block.id, (prev) => {
-      const base = (prev as CartesianStyle) ?? {}
-      const prevLightweight = base.lightweightCandles ?? {}
-      const prevSeriesColors = prevLightweight.candleSeriesColors ?? {}
-      const prevSeriesColor = prevSeriesColors[seriesId] ?? { up: fallbackColor, down: fallbackColor }
-      const nextSeriesColors = {
-        ...prevSeriesColors,
-        [seriesId]: {
-          up: patch.up ?? prevSeriesColor.up,
-          down: patch.down ?? prevSeriesColor.down,
-        },
-      }
-      return {
-        ...base,
-        lightweightCandles: {
-          ...prevLightweight,
-          candleSeriesColors: nextSeriesColors,
-        },
-      } as ChartStyle
-    })
-  }
-
-  const applyUpHexInput = () => {
-    const normalized = normalizeHexColor(upHexInput)
-    if (!normalized) {
-      setUpHexInput(displayUpColor)
-      return
-    }
-    setCandleTrendColor({ up: normalized })
-    setUpHexInput(normalized)
-  }
-
-  const applyDownHexInput = () => {
-    const normalized = normalizeHexColor(downHexInput)
-    if (!normalized) {
-      setDownHexInput(displayDownColor)
-      return
-    }
-    setCandleTrendColor({ down: normalized })
-    setDownHexInput(normalized)
-  }
-
-  const clearCandleTrendColor = () => {
-    onBlockStyleChange(block.id, (prev) => {
-      const base = (prev as CartesianStyle) ?? {}
-      const prevLightweight = base.lightweightCandles ?? {}
-      const prevSeriesColors = prevLightweight.candleSeriesColors ?? {}
-      if (!(seriesId in prevSeriesColors)) return prev
-      const nextSeriesColors = { ...prevSeriesColors }
-      delete nextSeriesColors[seriesId]
-      return {
-        ...base,
-        lightweightCandles: {
-          ...prevLightweight,
-          candleSeriesColors: Object.keys(nextSeriesColors).length > 0 ? nextSeriesColors : undefined,
-        },
-      } as ChartStyle
-    })
-  }
-
-  return (
-    <div className="rounded-md border border-border p-3 space-y-2">
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-sm font-medium">{seriesId}</p>
-      </div>
-
-      <div className="space-y-1.5">
-        <Label className="text-xs">상승 색</Label>
-        <div className="flex items-center gap-2">
-          <Input
-            value={upHexInput}
-            onChange={(event) => setUpHexInput(event.target.value)}
-            onBlur={applyUpHexInput}
-            placeholder="#FFFFFF"
-            className="h-8 text-xs"
-          />
-          <Input
-            type="color"
-            value={displayUpColor}
-            onChange={(event) => setCandleTrendColor({ up: event.target.value })}
-            className="h-8 w-11 p-1"
-            aria-label={`${seriesId} 상승 색`}
-          />
-        </div>
-      </div>
-
-      <div className="space-y-1.5">
-        <Label className="text-xs">하락 색</Label>
-        <div className="flex items-center gap-2">
-          <Input
-            value={downHexInput}
-            onChange={(event) => setDownHexInput(event.target.value)}
-            onBlur={applyDownHexInput}
-            placeholder="#FFFFFF"
-            className="h-8 text-xs"
-          />
-          <Input
-            type="color"
-            value={displayDownColor}
-            onChange={(event) => setCandleTrendColor({ down: event.target.value })}
-            className="h-8 w-11 p-1"
-            aria-label={`${seriesId} 하락 색`}
-          />
-        </div>
-      </div>
-
-      {hasOverride && (
-        <Button
-          type="button"
-          variant="ghost"
-          size="xs"
-          className="h-7"
-          onClick={clearCandleTrendColor}
-        >
-          커스텀 해제
-        </Button>
-      )}
-    </div>
-  )
-}
-
-function GroupColorRow({
-  block,
-  groupId,
-  fallbackColor,
-}: {
-  block: BlendedChartBlock
-  groupId: string
-  fallbackColor: string
-}) {
-  const { getChartState, setGroupColor, removeGroupColor } = useBlendedChartViewContext()
-  const chartState = getChartState(block.id)
-  const displayColor = chartState.groupColors[groupId] ?? fallbackColor
-  const hasOverride = Boolean(chartState.groupColors[groupId])
-  const [hexInput, setHexInput] = useState(displayColor)
-
-  useEffect(() => {
-    setHexInput(displayColor)
-  }, [displayColor])
-
-  const applyHexInput = () => {
-    const normalized = normalizeHexColor(hexInput)
-    // 잘못된 색상 입력은 즉시 원복해 상태 오염을 방지한다.
-    if (!normalized) {
-      setHexInput(displayColor)
-      return
-    }
-    setGroupColor(block.id, groupId, normalized)
-    setHexInput(normalized)
-  }
-
-  return (
-    <div className="rounded-md border border-border p-3 space-y-2">
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-sm font-medium">{groupId}</p>
-        <span className="inline-block h-4 w-4 rounded-sm border border-border" style={{ backgroundColor: displayColor }} />
-      </div>
-
-      <div className="flex flex-wrap gap-1.5">
-        {BASE_PALETTE.map((color) => (
-          <button
-            key={`${groupId}-${color}`}
-            type="button"
-            className={cn(
-              "h-5 w-5 rounded-sm border",
-              displayColor === color ? "border-foreground" : "border-border"
-            )}
-            style={{ backgroundColor: color }}
-            onClick={() => setGroupColor(block.id, groupId, color)}
-            aria-label={`${groupId} 색상 ${color}`}
-          />
-        ))}
-      </div>
-
-      <div className="flex items-center gap-2">
-        <Input
-          value={hexInput}
-          onChange={(event) => setHexInput(event.target.value)}
-          onBlur={applyHexInput}
-          placeholder="#FFFFFF"
-          className="h-8 text-xs"
-        />
-        <Input
-          type="color"
-          value={displayColor}
-          onChange={(event) => setGroupColor(block.id, groupId, event.target.value)}
-          className="h-8 w-11 p-1"
-          aria-label={`${groupId} 컬러피커`}
-        />
-      </div>
-
-      {hasOverride && (
-        <Button
-          type="button"
-          variant="ghost"
-          size="xs"
-          className="h-7"
-          onClick={() => removeGroupColor(block.id, groupId)}
-        >
-          커스텀 해제
-        </Button>
-      )}
-    </div>
-  )
-}
-
-function StylePanelContent({
-  activeBlock,
-  outlierCount,
-  chartCoreLegendMeta,
-  onBlockStyleChange,
-}: {
-  activeBlock: BlendedChartBlock
-  outlierCount: number
-  chartCoreLegendMeta?: ChartCoreLegendMeta | null
-  onBlockStyleChange: (blockId: string, updater: (prev: ChartStyle) => ChartStyle) => void
-}) {
-  const { getChartState, setShowOutliers, setShowTooltip, setShowLegend } = useBlendedChartViewContext()
-  const chartState = getChartState(activeBlock.id)
-  const hasData = hasRenderableSeries(activeBlock)
-  const hasSeries = activeBlock.data.series.length > 0
-  const outlierDisabled = !hasData || !isOutlierSupported(activeBlock) || outlierCount === 0
-  const tooltipDisabled = !hasData
-  const legendDisabled = !hasSeries
-
-  return (
-    <div className="space-y-3">
-      {/* 색상 */}
-      <section className="space-y-2">
-        <p className="text-xs font-medium">색상</p>
-        {hasSeries ? (
-          <div className="space-y-2">
-            {activeBlock.data.series.map((series) => (
-              <SeriesColorPopover
-                key={`${activeBlock.id}-color-${series.id}`}
-                block={activeBlock}
-                seriesId={series.id}
-              />
-            ))}
-          </div>
-        ) : (
-          <p className="text-[11px] text-muted-foreground">시리즈가 없습니다.</p>
-        )}
-      </section>
-
-      {/* 범례 */}
-      <section>
-        <div className="flex items-center justify-between">
-          <p className="text-xs font-medium">범례</p>
-          <ToggleSwitch
-            checked={chartState.showLegend}
-            disabled={legendDisabled}
-            onChange={(next) => setShowLegend(activeBlock.id, next)}
-          />
-        </div>
-      </section>
-
-      {/* 툴팁 */}
-      <section>
-        <div className="flex items-center justify-between">
-          <p className="text-xs font-medium">툴팁</p>
-          <ToggleSwitch
-            checked={chartState.showTooltip}
-            disabled={tooltipDisabled}
-            onChange={(next) => setShowTooltip(activeBlock.id, next)}
-          />
-        </div>
-      </section>
-
-      {/* 이상치 */}
-      <section>
-        <div className="flex items-center justify-between">
-          <p className="text-xs font-medium">이상치</p>
-          <ToggleSwitch
-            checked={chartState.showOutliers}
-            disabled={outlierDisabled}
-            onChange={(next) => setShowOutliers(activeBlock.id, next)}
-          />
-        </div>
-      </section>
-    </div>
-  )
-}
-
 function Phase3Screen() {
-  const { ensureChartState, getChartState, setShowOutliers } = useBlendedChartViewContext()
+  const { ensureChartState, getChartState, setShowOutliers, setShowTooltip, setShowLegend, setSeriesColor, removeSeriesColor, setGroupColor, removeGroupColor } = useBlendedChartViewContext()
   const supabase = useMemo(() => createClient(), [])
   const [activeChartId, setActiveChartId] = useState<string>(SAMPLE_BLOCKS[0]?.id ?? "")
   const [sideTab, setSideTab] = useState<"data" | "series" | "style">("data")
@@ -3867,6 +3381,19 @@ function Phase3Screen() {
                     outlierCount={outlierCount}
                     chartCoreLegendMeta={activeLegendState.chartCoreLegendMeta}
                     onBlockStyleChange={updateBlockStyle}
+                    showOutliers={chartState.showOutliers}
+                    showTooltip={chartState.showTooltip}
+                    showLegend={chartState.showLegend}
+                    seriesColors={chartState.seriesColors}
+                    groupColors={chartState.groupColors}
+                    onShowOutliersChange={setShowOutliers}
+                    onShowTooltipChange={setShowTooltip}
+                    onShowLegendChange={setShowLegend}
+                    onSetSeriesColor={setSeriesColor}
+                    onRemoveSeriesColor={removeSeriesColor}
+                    onSetGroupColor={setGroupColor}
+                    onRemoveGroupColor={removeGroupColor}
+                    compact
                   />
                 </TabsContent>
               </Tabs>
