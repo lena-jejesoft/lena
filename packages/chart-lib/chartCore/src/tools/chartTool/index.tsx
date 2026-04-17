@@ -1305,6 +1305,7 @@ export default function ChartToolView({
                     themeColors={chartThemeColors}
                     height={400}
                     allSeriesFields={seriesFields}
+                    seriesLabelMap={seriesLabelMap}
                     onTooltipChange={(payload, label) => {
                       setTooltipPayload(payload);
                       setHoveredLabel(label);

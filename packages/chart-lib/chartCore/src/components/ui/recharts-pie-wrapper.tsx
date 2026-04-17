@@ -28,10 +28,20 @@ export interface RechartsPieWrapperProps {
   onSelectedDataChange?: (data: PieChartDataItem[]) => void;  // 선택된 시점의 데이터 변경 콜백
   showDefaultLabels?: boolean;  // 디폴트 상태에서 라벨 표시 (기본 샘플용)
   labelThreshold?: number;      // 라벨 표시 최소 비율 (기본값: 0.05 = 5%)
+  seriesLabelMap?: Record<string, string>;  // field(id) → 표시용 레이블 매핑 (없으면 field 그대로 사용)
 }
 
+/** 표시용 레이블 해석: map이 있으면 매핑, 없으면 name 그대로 */
+const resolveDisplayName = (
+  name: string | undefined,
+  labelMap?: Record<string, string>
+): string => {
+  if (!name) return "";
+  return labelMap?.[name] ?? name;
+};
+
 /** 호버 시 강조 효과를 위한 활성 섹터 렌더러 */
-const renderActiveShape = (props: any) => {
+const renderActiveShape = (props: any, labelMap?: Record<string, string>) => {
   const RADIAN = Math.PI / 180;
   const {
     cx,
@@ -57,8 +67,8 @@ const renderActiveShape = (props: any) => {
   const ey = my;
   const textAnchor = cos >= 0 ? "start" : "end";
 
-  // 중앙 시리즈명 말줄임 (최대 10자)
-  const centerName = payload?.name || "";
+  // 중앙 시리즈명 말줄임 (최대 10자) — 표시용 label로 변환
+  const centerName = resolveDisplayName(payload?.name, labelMap);
   const displayCenterName = centerName.length > 10 ? `${centerName.slice(0, 10)}...` : centerName;
 
   return (
@@ -96,8 +106,7 @@ const renderActiveShape = (props: any) => {
         x={ex + (cos >= 0 ? 1 : -1) * 12}
         y={ey}
         textAnchor={textAnchor}
-        className="fill-foreground"
-        style={{ fontSize: 12 }}
+        style={{ fill: "hsl(var(--foreground))", fontSize: 12 }}
       >
         {(value ?? 0).toLocaleString()}
       </text>
@@ -117,7 +126,7 @@ const renderActiveShape = (props: any) => {
 };
 
 /** Small Multiples용 활성 섹터 렌더러 (기본 샘플 스타일 적용) */
-const renderCompactActiveShape = (props: any) => {
+const renderCompactActiveShape = (props: any, labelMap?: Record<string, string>) => {
   const RADIAN = Math.PI / 180;
   const {
     cx,
@@ -147,8 +156,8 @@ const renderCompactActiveShape = (props: any) => {
   const ey = my;
   const textAnchor = cos >= 0 ? "start" : "end";
 
-  // 중앙 시리즈명 말줄임 (최대 10자)
-  const centerName = payload?.name || "";
+  // 중앙 시리즈명 말줄임 (최대 10자) — 표시용 label로 변환
+  const centerName = resolveDisplayName(payload?.name, labelMap);
   const displayCenterName = centerName.length > 10 ? `${centerName.slice(0, 10)}...` : centerName;
 
   return (
@@ -186,8 +195,7 @@ const renderCompactActiveShape = (props: any) => {
         x={ex + (cos >= 0 ? 1 : -1) * 4}
         y={ey}
         textAnchor={textAnchor}
-        className="fill-foreground"
-        style={{ fontSize: 10 }}
+        style={{ fill: "hsl(var(--foreground))", fontSize: 10 }}
       >
         {(value ?? 0).toLocaleString()}
       </text>
@@ -207,7 +215,12 @@ const renderCompactActiveShape = (props: any) => {
 };
 
 /** 기본 라벨 렌더러 (연결선 포함, 일정 비율 이상만 표시, 호버 시 숨김) */
-const renderDefaultLabel = (props: any, threshold: number, isAnyHovered: boolean) => {
+const renderDefaultLabel = (
+  props: any,
+  threshold: number,
+  isAnyHovered: boolean,
+  labelMap?: Record<string, string>
+) => {
   const { cx, cy, midAngle, outerRadius, percent, name, fill } = props;
   // 비율 미달이거나 호버 중이면 모든 라벨 숨김
   if (percent < threshold) return null;
@@ -228,6 +241,9 @@ const renderDefaultLabel = (props: any, threshold: number, isAnyHovered: boolean
   const ey = my;
   const textAnchor = cos >= 0 ? "start" : "end";
 
+  // 표시용 레이블 (field id → 매핑된 label). 매핑 없으면 원본 사용.
+  const displayName = resolveDisplayName(name, labelMap);
+
   return (
     <g>
       {/* 연결선 */}
@@ -243,17 +259,21 @@ const renderDefaultLabel = (props: any, threshold: number, isAnyHovered: boolean
         y={ey}
         textAnchor={textAnchor}
         dominantBaseline="central"
-        className="fill-foreground"
-        style={{ fontSize: 11 }}
+        style={{ fill: "hsl(var(--foreground))", fontSize: 11 }}
       >
-        {`${name} (${(percent * 100).toFixed(1)}%)`}
+        {`${displayName} (${(percent * 100).toFixed(1)}%)`}
       </text>
     </g>
   );
 };
 
 /** Small Multiples용 컴팩트 라벨 렌더러 (연결선 포함) */
-const renderCompactLabel = (props: any, threshold: number, isAnyHovered: boolean) => {
+const renderCompactLabel = (
+  props: any,
+  threshold: number,
+  isAnyHovered: boolean,
+  labelMap?: Record<string, string>
+) => {
   const { cx, cy, midAngle, outerRadius, percent, name, fill } = props;
   // 비율 미달이거나 호버 중이면 모든 라벨 숨김
   if (percent < threshold) return null;
@@ -274,9 +294,10 @@ const renderCompactLabel = (props: any, threshold: number, isAnyHovered: boolean
   const ey = my;
   const textAnchor = cos >= 0 ? "start" : "end";
 
-  // 긴 라벨 말줄임 처리 (최대 6자, 비율은 호버시에만)
+  // 표시용 레이블 → 말줄임 (최대 6자, 비율은 호버시에만)
+  const resolvedName = resolveDisplayName(name, labelMap);
   const maxLength = 6;
-  const displayName = name.length > maxLength ? `${name.slice(0, maxLength)}...` : name;
+  const displayName = resolvedName.length > maxLength ? `${resolvedName.slice(0, maxLength)}...` : resolvedName;
 
   return (
     <g>
@@ -293,8 +314,7 @@ const renderCompactLabel = (props: any, threshold: number, isAnyHovered: boolean
         y={ey}
         textAnchor={textAnchor}
         dominantBaseline="central"
-        className="fill-foreground"
-        style={{ fontSize: 10 }}
+        style={{ fill: "hsl(var(--foreground))", fontSize: 10 }}
       >
         {displayName}
       </text>
@@ -313,6 +333,7 @@ export function RechartsPieWrapper({
   onSelectedDataChange,
   showDefaultLabels = true,
   labelThreshold = 0.01,
+  seriesLabelMap,
 }: RechartsPieWrapperProps) {
   const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined);
   const [activeTimepoint, setActiveTimepoint] = useState<string | null>(null);
@@ -418,7 +439,7 @@ export function RechartsPieWrapper({
               <PieChart margin={{ top: 30, right: 100, bottom: 30, left: 100 }}>
                 <Pie
                   activeIndex={activeIndex}
-                  activeShape={renderActiveShape}
+                  activeShape={(p: any) => renderActiveShape(p, seriesLabelMap)}
                   data={selectedFilteredData}
                   cx="50%"
                   cy="50%"
@@ -442,7 +463,7 @@ export function RechartsPieWrapper({
                     setActiveIndex(undefined);
                     onTooltipChange?.(null, null);
                   }}
-                  label={(props) => renderDefaultLabel(props, labelThreshold, activeIndex !== undefined)}
+                  label={(props) => renderDefaultLabel(props, labelThreshold, activeIndex !== undefined, seriesLabelMap)}
                   labelLine={false}
                 >
                   {selectedFilteredData.map((entry) => (
@@ -497,7 +518,7 @@ export function RechartsPieWrapper({
                   <PieChart margin={margin}>
                     <Pie
                       activeIndex={currentActiveIndex}
-                      activeShape={renderCompactActiveShape}
+                      activeShape={(p: any) => renderCompactActiveShape(p, seriesLabelMap)}
                       data={tpFilteredData}
                       cx="50%"
                       cy="50%"
@@ -524,7 +545,7 @@ export function RechartsPieWrapper({
                         setActiveIndex(undefined);
                         onTooltipChange?.(null, null);
                       }}
-                      label={(props) => renderCompactLabel(props, labelThreshold, activeTimepoint !== null)}
+                      label={(props) => renderCompactLabel(props, labelThreshold, activeTimepoint !== null, seriesLabelMap)}
                       labelLine={false}
                     >
                       {tpFilteredData.map((entry) => (
@@ -555,7 +576,7 @@ export function RechartsPieWrapper({
       <PieChart margin={{ top: 40, right: 120, bottom: 40, left: 120 }}>
         <Pie
           activeIndex={activeIndex}
-          activeShape={renderActiveShape}
+          activeShape={(p: any) => renderActiveShape(p, seriesLabelMap)}
           data={filteredData}
           cx="50%"
           cy="50%"
@@ -565,7 +586,7 @@ export function RechartsPieWrapper({
           nameKey="name"
           onMouseEnter={onPieEnter}
           onMouseLeave={onPieLeave}
-          label={showDefaultLabels ? (props) => renderDefaultLabel(props, labelThreshold, activeIndex !== undefined) : false}
+          label={showDefaultLabels ? (props) => renderDefaultLabel(props, labelThreshold, activeIndex !== undefined, seriesLabelMap) : false}
           labelLine={false}
         >
           {filteredData.map((entry) => (
