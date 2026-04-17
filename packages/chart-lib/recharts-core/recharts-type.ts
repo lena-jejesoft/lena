@@ -30,7 +30,7 @@ export type RechartsChartData = ChartData
 
 /** 지원하는 차트 타입 */
 export type ChartType = "column" | "line" | "area" | "area-100" | "stacked-area" | "ownership-stacked" | "synced-area" | "mixed" | "stacked" | "stacked-100" | "stacked-grouped" | "dual-axis" | "dual-axis-stacked-bar" | "pie" | "two-level-pie" | "treemap" | "multi-level-treemap" | "ranking-bar" | "geo-grid" | "regression-scatter" | "radar";
-export type RechartsChartType = "recharts/column" | "recharts/line" | "recharts/area" | "recharts/area-100" | "recharts/stacked-area" | "recharts/ownership-stacked" | "recharts/synced-area" | "recharts/mixed" | "recharts/stacked" | "recharts/stacked-100" | "recharts/stacked-grouped" | "recharts/dual-axis" | "recharts/dual-axis-stacked-bar" | "recharts/pie" | "recharts/two-level-pie" | "recharts/treemap" | "recharts/multi-level-treemap" | "recharts/ranking-bar" | "recharts/geo-grid" | "recharts/regression-scatter" | "recharts/radar";
+export type RechartsChartType = "recharts/column" | "recharts/line" | "recharts/area" | "recharts/area-100" | "recharts/stacked-area" | "recharts/ownership-stacked" | "recharts/synced-area" | "recharts/mixed" | "recharts/stacked" | "recharts/stacked-100" | "recharts/stacked-grouped" | "recharts/dual-axis" | "recharts/pie" | "recharts/two-level-pie" | "recharts/treemap" | "recharts/multi-level-treemap" | "recharts/ranking-bar" | "recharts/geo-grid" | "recharts/regression-scatter" | "recharts/radar";
 
 /** Y축 배치 타입 */
 export type YAxisPlacement = "left" | "right";

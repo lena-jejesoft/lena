@@ -29,12 +29,10 @@ export const CHART_TYPE_OPTIONS: ChartTypeOption[] = [
   { value: "chartCore/regression-scatter", label: "Regression Scatter", iconKey: "regression-scatter" },
   { value: "core/grid", label: "Core / Grid", iconKey: "grid" },
   { value: "core/insider-trading", label: "Core / Insider Trading", iconKey: "insider-trading" },
-  { value: "recharts/grouped-bar", label: "Grouped Bar", iconKey: "grouped-bar" },
   { value: "recharts/ownership-stacked", label: "Ownership Stacked", iconKey: "stacked-area" },
   { value: "recharts/gauge", label: "Gauge (Recharts)", iconKey: "gauge" },
   { value: "recharts/value-conversion-bridge", label: "Value Conversion Bridge", iconKey: "value-conversion" },
   { value: "recharts/sankey-diagram", label: "Sankey Diagram", iconKey: "sankey" },
-  { value: "recharts/dual-axis-stacked-bar", label: "Dual Axis Stacked Bar (Recharts)", iconKey: "dual-axis-stacked-bar" },
   { value: "recharts/radar", label: "Radar", iconKey: "radar" },
   { value: "lightweight/candles", label: "Candlestick", iconKey: "candles" },
 ];

@@ -207,38 +207,6 @@ const PRODUCTION_CAPACITY_ROW_DATA: ProductionCapacityRow[] = [
   },
 ];
 
-const PRODUCTION_CAPACITY_GROUP_ASSIGNMENTS: Record<string, number> = {
-  dx_tv: 1,
-  dx_smartphone: 1,
-  ds_memory: 2,
-  sdc_panel: 3,
-  harman_cockpit: 4,
-};
-
-const PRODUCTION_CAPACITY_AXIS_PLACEMENTS: Record<string, "left" | "right"> = {
-  dx_tv: "right",
-  dx_smartphone: "right",
-  ds_memory: "left",
-  sdc_panel: "right",
-  harman_cockpit: "right",
-};
-
-const PRODUCTION_CAPACITY_Y_FIELD_TYPES: Record<string, "column" | "line"> = {
-  dx_tv: "column",
-  dx_smartphone: "column",
-  ds_memory: "column",
-  sdc_panel: "column",
-  harman_cockpit: "column",
-};
-
-const PRODUCTION_CAPACITY_ENABLED_FIELDS: Record<string, boolean> = {
-  dx_tv: true,
-  dx_smartphone: true,
-  ds_memory: true,
-  sdc_panel: true,
-  harman_cockpit: true,
-};
-
 type CoreGridTradeRow = {
   date: string;
   action: "Buy" | "Sell";
@@ -462,43 +430,6 @@ function generateDemoData(chartType: ChartType): ChartData {
     };
   }
 
-  if (chartType === "recharts/grouped-bar") {
-    return {
-      xAxisType: "category",
-      series: [
-        {
-          id: "short-term",
-          name: "Short Term",
-          data: [
-            { x: "Assets", y: 68.64 },
-            { x: "Liabilities", y: 31.71 },
-          ] as CartesianPoint[],
-        },
-        {
-          id: "long-term",
-          name: "Long Term",
-          data: [
-            { x: "Assets", y: 69.16 },
-            { x: "Liabilities", y: 23.23 },
-          ] as CartesianPoint[],
-        },
-      ],
-    };
-  }
-
-  if (chartType === "recharts/dual-axis-stacked-bar") {
-    return {
-      xAxisType: "category",
-      series: [
-        {
-          id: "production-capacity",
-          name: "생산능력",
-          data: PRODUCTION_CAPACITY_ROW_DATA as unknown as CartesianPoint[],
-        },
-      ],
-    };
-  }
-
   if (chartType === "chartCore/dual-axis-stacked-bar") {
     return {
       xAxisType: "category",
@@ -674,44 +605,6 @@ function generateDemoData(chartType: ChartType): ChartData {
   };
 }
 
-function getDefaultStyleForChartType(chartType: ChartType, previousStyle?: ChartStyle): ChartStyle | undefined {
-  if (chartType !== "recharts/dual-axis-stacked-bar") return undefined;
-
-  const base = (previousStyle as CartesianStyle | undefined) ?? {};
-  return {
-    ...base,
-    legend: base.legend ?? { position: "bottom" },
-    tooltip: base.tooltip ?? { shared: true },
-    timepointLine: {
-      ...(base.timepointLine ?? {}),
-      showOutliers: false,
-      enabled: {
-        ...PRODUCTION_CAPACITY_ENABLED_FIELDS,
-        ...(base.timepointLine?.enabled ?? {}),
-      },
-    },
-    stackedGrouped: {
-      ...(base.stackedGrouped ?? {}),
-      groupCount: 4,
-      assignments: {
-        ...PRODUCTION_CAPACITY_GROUP_ASSIGNMENTS,
-        ...(base.stackedGrouped?.assignments ?? {}),
-      },
-    },
-    dualAxis: {
-      ...(base.dualAxis ?? {}),
-      placements: {
-        ...PRODUCTION_CAPACITY_AXIS_PLACEMENTS,
-        ...(base.dualAxis?.placements ?? {}),
-      },
-      yFieldTypes: {
-        ...PRODUCTION_CAPACITY_Y_FIELD_TYPES,
-        ...(base.dualAxis?.yFieldTypes ?? {}),
-      },
-    },
-  } as ChartStyle;
-}
-
 let nextBlockId = 1;
 
 function createChartBlock(chartType: ChartType = "chartCore/line", title?: string): ChartBlock {
@@ -791,16 +684,11 @@ export default function ChartLabPage() {
     }
 
     setBlocks((prev) =>
-      prev.map((block) => {
-        if (block.id !== id) return block;
-        const defaultStyle = getDefaultStyleForChartType(type, block.style);
-        return {
-          ...block,
-          chartType: type,
-          data: generateDemoData(type),
-          style: defaultStyle ?? block.style,
-        };
-      })
+      prev.map((block) =>
+        block.id === id
+          ? { ...block, chartType: type, data: generateDemoData(type) }
+          : block
+      )
     );
   }, [updateBlock, samsungOhlcvData, samsungOhlcvLoaded]);
 

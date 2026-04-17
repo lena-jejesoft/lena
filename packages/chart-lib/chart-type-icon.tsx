@@ -10,7 +10,6 @@ export type ChartTypeIconKey =
   | "stacked-column"
   | "stacked-column-100"
   | "bar"
-  | "grouped-bar"
   | "stacked-bar"
   | "area"
   | "stacked-area"
@@ -64,7 +63,6 @@ export function inferChartTypeIconKey(chartType: ChartType): ChartTypeIconKey {
   if (value.includes("stacked-grouped")) return "stacked-column"
   if (value.includes("stacked-100")) return "stacked-column-100"
   if (value.includes("stacked")) return value.includes("bar") ? "stacked-bar" : "stacked-column"
-  if (value.includes("grouped-bar")) return "grouped-bar"
   if (value.includes("ranking-bar")) return "bar"
   if (value === "bar" || value.endsWith("/bar")) return "bar"
   if (value === "column" || value.endsWith("/column")) return "column"
@@ -128,14 +126,6 @@ export function ChartTypeIcon({
           <rect x="4" y="4" width="8" height="4" rx="0.75" />
           <rect x="4" y="10" width="13" height="4" rx="0.75" />
           <rect x="4" y="16" width="17" height="4" rx="0.75" />
-        </svg>
-      )
-    case "grouped-bar":
-      return (
-        <svg viewBox="0 0 24 24" fill="currentColor" className={iconClassName} aria-hidden="true" {...props}>
-          <rect x="4" y="4" width="10" height="4" rx="0.75" />
-          <rect x="4" y="10" width="14" height="4" rx="0.75" />
-          <rect x="4" y="16" width="8" height="4" rx="0.75" />
         </svg>
       )
     case "stacked-bar":

@@ -120,7 +120,6 @@ export function ChartBlockCard({
         block.chartType !== "recharts/synced-area" &&
         block.chartType !== "recharts/mixed" &&
         block.chartType !== "recharts/dual-axis" &&
-        block.chartType !== "recharts/dual-axis-stacked-bar" &&
         block.chartType !== "recharts/geo-grid" &&
         block.chartType !== "recharts/ranking-bar" &&
         block.chartType !== "recharts/regression-scatter" &&

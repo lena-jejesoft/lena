@@ -179,12 +179,6 @@ export const CHART_TYPE_REGISTRY: Record<ChartType, ChartTypeSpec> = {
     label: "Recharts/막대",
     renderer: "recharts",
   },
-  "recharts/grouped-bar": {
-    pointType: "cartesian",
-    xAxisTypes: ["category"],
-    label: "Recharts/묶음 막대 비교",
-    renderer: "recharts",
-  },
   "recharts/area": {
     pointType: "cartesian",
     xAxisTypes: ["datetime", "category", "numeric"],
@@ -279,12 +273,6 @@ export const CHART_TYPE_REGISTRY: Record<ChartType, ChartTypeSpec> = {
     pointType: "cartesian",
     xAxisTypes: ["datetime", "category", "numeric"],
     label: "Recharts/이중축",
-    renderer: "recharts",
-  },
-  "recharts/dual-axis-stacked-bar": {
-    pointType: "cartesian",
-    xAxisTypes: ["datetime", "category"],
-    label: "Recharts/이중축 그룹형 누적 막대",
     renderer: "recharts",
   },
   "recharts/mixed": {
@@ -461,10 +449,6 @@ export const CHART_STYLE_OPTIONS: Record<ChartType, StyleOptionSpec> = {
     styleType: "cartesian",
     options: ["colorPalette", "dataLabels", "yAxes", "legend", "tooltip"],
   },
-  "recharts/grouped-bar": {
-    styleType: "cartesian",
-    options: ["colorPalette", "dataLabels", "yAxes", "legend", "tooltip"],
-  },
   "recharts/area": {
     styleType: "cartesian",
     options: ["colorPalette", "lineWidth", "yAxes", "legend", "tooltip"],
@@ -526,10 +510,6 @@ export const CHART_STYLE_OPTIONS: Record<ChartType, StyleOptionSpec> = {
     options: ["colorPalette", "dataLabels", "yAxes", "legend", "tooltip"],
   },
   "recharts/dual-axis": {
-    styleType: "cartesian",
-    options: ["colorPalette", "lineWidth", "markerEnabled", "dataLabels", "yAxes", "legend", "tooltip"],
-  },
-  "recharts/dual-axis-stacked-bar": {
     styleType: "cartesian",
     options: ["colorPalette", "lineWidth", "markerEnabled", "dataLabels", "yAxes", "legend", "tooltip"],
   },

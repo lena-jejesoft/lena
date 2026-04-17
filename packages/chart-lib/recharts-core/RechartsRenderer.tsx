@@ -13,7 +13,6 @@ import { ChartCoreTreemapRenderer } from "./ChartCoreTreemapRenderer";
 import { ChartCoreGeoGridRenderer } from "./ChartCoreGeoGridRenderer";
 import { ChartCoreRankingBarRenderer } from "./ChartCoreRankingBarRenderer";
 import { ChartCoreDualAxisRenderer } from "./ChartCoreDualAxisRenderer";
-import { ChartCoreDualAxisStackedBarRenderer } from "./ChartCoreDualAxisStackedBarRenderer";
 import { ChartCoreMixedRenderer } from "./ChartCoreMixedRenderer";
 import { ChartCoreSyncedAreaRenderer } from "./ChartCoreSyncedAreaRenderer";
 import { ChartCoreRegressionScatterRenderer } from "./ChartCoreRegressionScatterRenderer";
@@ -23,7 +22,6 @@ import { RechartsSankeyRenderer } from "./RechartsSankeyRenderer";
 import { RechartsRangedBarRenderer } from "./RechartsRangedBarRenderer";
 import { RechartsGaugeRenderer } from "./RechartsGaugeRenderer";
 import { RechartsOwnershipStackedRenderer } from "./RechartsOwnershipStackedRenderer";
-import { RechartsGroupedBarComparisonRenderer } from "./RechartsGroupedBarComparisonRenderer";
 import type { ChartData, ChartStyle, ChartTimeRange } from "../types";
 
 type RechartsRendererProps = {
@@ -62,16 +60,6 @@ export function RechartsRenderer({
     return (
       <ChartCoreColumnRenderer
         data={data as any}
-        style={style}
-        height={height}
-        onLegendStateChange={onLegendStateChange}
-      />
-    );
-  }
-  if (coreType === "grouped-bar") {
-    return (
-      <RechartsGroupedBarComparisonRenderer
-        data={data}
         style={style}
         height={height}
         onLegendStateChange={onLegendStateChange}
@@ -221,16 +209,6 @@ export function RechartsRenderer({
   if (coreType === "dual-axis") {
     return (
       <ChartCoreDualAxisRenderer
-        data={data as any}
-        style={style}
-        height={height}
-        onLegendStateChange={onLegendStateChange}
-      />
-    );
-  }
-  if (coreType === "dual-axis-stacked-bar") {
-    return (
-      <ChartCoreDualAxisStackedBarRenderer
         data={data as any}
         style={style}
         height={height}

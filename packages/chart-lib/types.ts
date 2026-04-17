@@ -3,7 +3,6 @@
 export type RechartsChartType =
   | "recharts/line"
   | "recharts/column"
-  | "recharts/grouped-bar"
   | "recharts/area"
   | "recharts/area-100"
   | "recharts/stacked-area"
@@ -20,7 +19,6 @@ export type RechartsChartType =
   | "recharts/stacked"
   | "recharts/stacked-100"
   | "recharts/dual-axis"
-  | "recharts/dual-axis-stacked-bar"
   | "recharts/mixed"
   | "recharts/synced-area"
   | "recharts/regression-scatter"

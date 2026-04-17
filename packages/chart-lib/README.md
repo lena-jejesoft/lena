@@ -14,7 +14,7 @@
 | React | 19.x | |
 | Tailwind CSS | 4.x | `@tailwindcss/postcss` |
 | shadcn/ui | — | `Input`, `Button`, `Select`, `Popover`, `Tabs` 등 |
-| Recharts | 2.x | grouped-bar, sankey, radar, gauge 등 |
+| Recharts | 2.x | sankey, radar, gauge 등 |
 | Lightweight Charts | 5.x | candlestick (`lightweight/candles`) |
 
 ## 설치 방법
@@ -158,12 +158,10 @@ UI에서 선택 가능한 활성 차트 유형 목록.
 
 | 차트 유형 | 레이블 |
 |---|---|
-| `recharts/grouped-bar` | Grouped Bar |
 | `recharts/ownership-stacked` | Ownership Stacked |
 | `recharts/gauge` | Gauge (Recharts) |
 | `recharts/value-conversion-bridge` | Value Conversion Bridge |
 | `recharts/sankey-diagram` | Sankey Diagram |
-| `recharts/dual-axis-stacked-bar` | Dual Axis Stacked Bar (Recharts) |
 | `recharts/radar` | Radar |
 
 ### 특수
