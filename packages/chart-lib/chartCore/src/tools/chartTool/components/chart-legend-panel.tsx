@@ -747,19 +747,33 @@ export function ChartLegendPanel({
             <div className="space-y-2">
               {tooltipPayload && tooltipPayload.length >= 2 ? (
                 <div className="space-y-1.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">{getSeriesLabel(regressionScatterXField || 'X')}:</span>
-                    <span className="font-medium text-foreground">{formatValue(tooltipPayload[0].value)}</span>
+                  <div className="flex items-center justify-between gap-2 text-xs">
+                    <span
+                      className="text-muted-foreground truncate min-w-0"
+                      title={`${getSeriesLabel(regressionScatterXField || 'X')}:`}
+                    >
+                      {getSeriesLabel(regressionScatterXField || 'X')}:
+                    </span>
+                    <span className="font-medium text-foreground whitespace-nowrap flex-shrink-0">
+                      {formatValue(tooltipPayload[0].value)}
+                    </span>
                   </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">{getSeriesLabel(regressionScatterYField || 'Y')}:</span>
-                    <span className="font-medium text-foreground">{formatValue(tooltipPayload[1].value)}</span>
+                  <div className="flex items-center justify-between gap-2 text-xs">
+                    <span
+                      className="text-muted-foreground truncate min-w-0"
+                      title={`${getSeriesLabel(regressionScatterYField || 'Y')}:`}
+                    >
+                      {getSeriesLabel(regressionScatterYField || 'Y')}:
+                    </span>
+                    <span className="font-medium text-foreground whitespace-nowrap flex-shrink-0">
+                      {formatValue(tooltipPayload[1].value)}
+                    </span>
                   </div>
                   {/* 이상치일 때 표시 */}
                   {tooltipPayload[1]?.isOutlier && (
-                    <div className="flex items-center justify-between text-xs pt-1 border-t border-border">
-                      <span className="text-[#ef4444] font-medium">이상치</span>
-                      <span className="text-muted-foreground">
+                    <div className="flex items-center justify-between gap-2 text-xs pt-1 border-t border-border">
+                      <span className="text-[#ef4444] font-medium truncate min-w-0" title="이상치">이상치</span>
+                      <span className="text-muted-foreground whitespace-nowrap flex-shrink-0">
                         잔차 {tooltipPayload[1].residual >= 0 ? '+' : ''}{formatValue(tooltipPayload[1].residual)}
                       </span>
                     </div>
@@ -767,21 +781,31 @@ export function ChartLegendPanel({
                 </div>
               ) : (
                 <div className="space-y-1.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">{getSeriesLabel(regressionScatterXField || 'X')}:</span>
-                    <span className="text-muted-foreground">-</span>
+                  <div className="flex items-center justify-between gap-2 text-xs">
+                    <span
+                      className="text-muted-foreground truncate min-w-0"
+                      title={`${getSeriesLabel(regressionScatterXField || 'X')}:`}
+                    >
+                      {getSeriesLabel(regressionScatterXField || 'X')}:
+                    </span>
+                    <span className="text-muted-foreground whitespace-nowrap flex-shrink-0">-</span>
                   </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">{getSeriesLabel(regressionScatterYField || 'Y')}:</span>
-                    <span className="text-muted-foreground">-</span>
+                  <div className="flex items-center justify-between gap-2 text-xs">
+                    <span
+                      className="text-muted-foreground truncate min-w-0"
+                      title={`${getSeriesLabel(regressionScatterYField || 'Y')}:`}
+                    >
+                      {getSeriesLabel(regressionScatterYField || 'Y')}:
+                    </span>
+                    <span className="text-muted-foreground whitespace-nowrap flex-shrink-0">-</span>
                   </div>
                 </div>
               )}
               {/* R² 값 표시 */}
               {regressionStats && (
-                <div className="flex items-center justify-between text-xs pt-1.5 border-t border-border">
-                  <span className="text-muted-foreground">R² (결정계수):</span>
-                  <span className="font-medium text-foreground">{regressionStats.r2.toFixed(3)}</span>
+                <div className="flex items-center justify-between gap-2 text-xs pt-1.5 border-t border-border">
+                  <span className="text-muted-foreground truncate min-w-0" title="R² (결정계수):">R² (결정계수):</span>
+                  <span className="font-medium text-foreground whitespace-nowrap flex-shrink-0">{regressionStats.r2.toFixed(3)}</span>
                 </div>
               )}
             </div>

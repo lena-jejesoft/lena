@@ -648,23 +648,30 @@ export function ChartLegendPanel({
           <div className="rounded-[10px] bg-gray-100 px-3.5 py-3 min-h-[72px] flex flex-col justify-center">
             {tooltipPayload && tooltipPayload.length >= 2 ? (
               <>
-                <div className="text-sm font-semibold text-gray-700 mb-2">{hoveredLabel || "선택된 포인트"}</div>
+                <div className="text-sm font-semibold text-gray-700 mb-2 truncate" title={hoveredLabel || "선택된 포인트"}>
+                  {hoveredLabel || "선택된 포인트"}
+                </div>
                 <div className="w-full h-px bg-gray-300 mb-2"></div>
                 <div className="space-y-1.5">
-                  {tooltipPayload.map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-2">
-                      <span className="text-xs text-gray-700">{getSeriesLabel(String(item.dataKey ?? ""))}({idx === 0 ? 'X' : 'Y'}):</span>
-                      <span className="text-xs font-medium text-gray-700">
-                        {formatValue(item.value)}
-                      </span>
-                    </div>
-                  ))}
+                  {tooltipPayload.map((item, idx) => {
+                    const labelText = `${getSeriesLabel(String(item.dataKey ?? ""))}(${idx === 0 ? 'X' : 'Y'}):`;
+                    return (
+                      <div key={idx} className="flex items-center justify-between gap-2">
+                        <span className="text-xs text-gray-700 truncate min-w-0" title={labelText}>
+                          {labelText}
+                        </span>
+                        <span className="text-xs font-medium text-gray-700 whitespace-nowrap flex-shrink-0">
+                          {formatValue(item.value)}
+                        </span>
+                      </div>
+                    );
+                  })}
                   {/* 이상치일 때만 회귀 잔차 표시 */}
                   {tooltipPayload[1]?.isOutlier && tooltipPayload[1]?.residual != null && (
                     <>
-                      <div className="flex items-center gap-2 pt-1">
-                        <span className="text-xs text-gray-700">상태:</span>
-                        <span className="text-xs font-medium">
+                      <div className="flex items-center justify-between gap-2 pt-1">
+                        <span className="text-xs text-gray-700 truncate min-w-0" title="상태:">상태:</span>
+                        <span className="text-xs font-medium whitespace-nowrap flex-shrink-0">
                           <span className="text-[#ef4444]">이상치</span>
                           <span className="text-gray-700"> (회귀 잔차 {tooltipPayload[1].residual >= 0 ? '+' : ''}{formatValue(tooltipPayload[1].residual)})</span>
                         </span>
