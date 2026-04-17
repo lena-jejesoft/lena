@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { ChartType, ChartStyle, ChartData, CartesianPoint, CartesianStyle, OHLCPoint } from "@/packages/chart-lib/types";
 import { Page, Panel } from "@/components/layout";
-import { Button } from "@/components/ui/button";
 import { fetchSamsungSecuritiesOhlcv, toLightweightCandlesChartData } from "./query";
 import { ChartBlockCard } from "./chart-block-card";
 // ─── Types ───
@@ -669,29 +668,6 @@ export default function ChartLabPage() {
     console.warn(`[ChartLab] 삼성증권 OHLCV 로딩 실패: ${samsungOhlcvError}`);
   }, [samsungOhlcvError]);
 
-  // ─── Block actions ───
-
-  const updateBlock = useCallback((id: number, patch: Partial<ChartBlock>) => {
-    setBlocks((prev) =>
-      prev.map((b) => (b.id === id ? { ...b, ...patch } : b))
-    );
-  }, []);
-
-  const handleChartTypeChange = useCallback((id: number, type: ChartType) => {
-    if (type === "lightweight/candles" && samsungOhlcvLoaded && samsungOhlcvData) {
-      updateBlock(id, { chartType: type, data: samsungOhlcvData });
-      return;
-    }
-
-    setBlocks((prev) =>
-      prev.map((block) =>
-        block.id === id
-          ? { ...block, chartType: type, data: generateDemoData(type) }
-          : block
-      )
-    );
-  }, [updateBlock, samsungOhlcvData, samsungOhlcvLoaded]);
-
   return (
     <Page direction="horizontal">
       {/* ═══ Center Panel ═══ */}
@@ -706,12 +682,8 @@ export default function ChartLabPage() {
           {blocks.map((block) => (
             <ChartBlockCard
               key={block.id}
-              block={block}
               isActive={activeBlockId === block.id}
               onActivate={() => setActiveBlockId(block.id)}
-              onTitleChange={(title) => updateBlock(block.id, { title })}
-              onChartTypeChange={(type) => handleChartTypeChange(block.id, type)}
-              onStyleChange={(style) => updateBlock(block.id, { style })}
             />
           ))}
 
