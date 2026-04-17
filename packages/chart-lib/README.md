@@ -1,220 +1,192 @@
-# DataChart
+# chart-lib
 
-범용 차트 컴포넌트. 주가, 재무, 문서 인라인, 사용자 생성 차트 등 모든 차트 시나리오를 하나의 컴포넌트로 처리한다.
+65종 이상의 차트를 렌더링하는 React 컴포넌트 라이브러리.
+`<DataChart>` 하나에 `data`와 `chartType`만 넘기면 동작한다.
+내부적으로 Highcharts, Recharts, Lightweight Charts 3개 렌더러를 차트 유형에 따라 자동 라우팅한다.
 
-## 구조
+## 제약사항
+
+**이 라이브러리는 현재 사내 레포 내부 패키지 형태입니다. Next.js + Tailwind 4 + shadcn/ui 스택이 갖춰진 프로젝트에서만 동작합니다.**
+
+| 의존성 | 버전 | 비고 |
+|---|---|---|
+| Next.js | 16.x | `"use client"` + `dynamic()` SSR 비활성 |
+| React | 19.x | |
+| Tailwind CSS | 4.x | `@tailwindcss/postcss` |
+| shadcn/ui | — | `Input`, `Button`, `Select`, `Popover`, `Tabs` 등 |
+| Highcharts | 12.x | line, area, column, pie, waterfall 등 |
+| Recharts | 2.x | grouped-bar, sankey, radar, gauge 등 |
+| Lightweight Charts | 5.x | candlestick (`lightweight/candles`) |
+
+## 설치 방법
+
+이 라이브러리는 npm 패키지가 아니다. 호스트 프로젝트에 직접 복사하여 사용한다.
+
+### 1. 레포 클론
+
+```bash
+git clone https://github.com/lena-jejesoft/lena.git
+cd lena
+```
+
+### 2. 파일 복사
+
+`packages/chart-lib/` 디렉토리 전체를 자기 프로젝트의 동일 경로에 복사한다.
 
 ```
-components/chart/
-├── types.ts              # 타입 정의 (ChartType, ChartData, ChartStyle, DataChartProps)
-├── registry.ts           # 차트유형별 데이터/스타일 요구사항 레지스트리
-├── DataChart.tsx          # Shell: controlMode에 따라 sidebar/toolbar/none 렌더링
-├── ChartRenderer.tsx      # Highcharts 래퍼 (순수 렌더링)
-├── ChartToolbar.tsx       # 좁은 패널용 상단 툴바 (설정 버튼 → 모달)
-├── ChartStyleModal.tsx    # 스타일 편집 모달 (Radix Dialog)
-├── adapters.ts            # 도메인 데이터 → ChartData 변환 함수
-└── sidebar/
-    ├── ChartSidebar.tsx   # 사이드바 컨테이너 (데이터/스타일 탭)
-    ├── DataTab.tsx        # 차트유형, X축, 시리즈 관리
-    └── StyleTab.tsx       # 차트유형별 동적 스타일 UI
+your-project/
+├── packages/
+│   └── chart-lib/          ← 이 디렉토리 전체 복사
+├── components/
+│   └── ui/                 ← shadcn/ui 컴포넌트 필요 (Button, Input, Select, Popover, Tabs 등)
+├── lib/
+│   └── utils.ts            ← cn() 유틸 필요 (tailwind-merge + clsx)
+└── tsconfig.json
 ```
 
-## 사용법
+### 3. tsconfig.json alias 설정
 
-### 기본
+```jsonc
+{
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./*"],
+      "@chartCore/*": ["./packages/chart-lib/chartCore/*"]
+    }
+  }
+}
+```
+
+- `@/*` — 프로젝트 루트 기준 절대 경로. 라이브러리 내부의 모든 import가 `@/packages/chart-lib/...` 형태를 사용한다.
+- `@chartCore/*` — chartCore 렌더러 내부 모듈 참조용.
+
+### 4. 의존성 설치
+
+차트 렌더링 엔진 (필수):
+
+```bash
+npm install highcharts@^12.5.0 recharts@^2.15.4 lightweight-charts@^5.1.0
+```
+
+호스트 앱에 아직 없다면 아래도 함께 필요하다:
+
+```bash
+npm install next@16 react@19 react-dom@19
+npm install tailwindcss@^4.1 @tailwindcss/postcss@^4.1
+npm install tailwind-merge@^3.4 clsx@^2.1 class-variance-authority@^0.7 lucide-react@^0.563
+```
+
+## 기본 사용법
+
+가장 간단한 라인 차트 예제:
 
 ```tsx
-import { DataChart } from "@/packages/chart-lib/DataChart";
-import type { ChartData, ChartType, ChartStyle } from "@/packages/chart-lib/types";
+import { DataChart } from "@/packages/chart-lib/DataChart"
+import type { ChartData } from "@/packages/chart-lib/types"
 
-<DataChart
-  data={chartData}
-  chartType="line"
-  onChartTypeChange={setChartType}
-  style={chartStyle}
-  onStyleChange={setChartStyle}
-/>
+const data: ChartData = {
+  xAxisType: "category",
+  series: [
+    {
+      id: "revenue",
+      name: "매출",
+      data: [
+        { x: "1월", y: 100 },
+        { x: "2월", y: 150 },
+        { x: "3월", y: 130 },
+      ],
+    },
+  ],
+}
+
+export default function MyChart() {
+  return <DataChart data={data} chartType="chartCore/line" />
+}
 ```
 
 ### Props
 
-| Prop | 타입 | 기본값 | 설명 |
-|------|------|--------|------|
-| `data` | `ChartData` | 필수 | 시리즈 배열 + xAxisType |
-| `chartType` | `ChartType` | 필수 | 현재 차트 유형 |
-| `onChartTypeChange` | `(type) => void` | - | 차트 유형 변경 콜백 |
-| `style` | `ChartStyle` | 내부 기본값 | 스타일 설정 |
-| `onStyleChange` | `(style) => void` | - | 스타일 변경 콜백 |
-| `controlMode` | `"sidebar" \| "toolbar" \| "none"` | `"sidebar"` | 컨트롤 방식 |
-| `availableChartTypes` | `ChartType[]` | 전체 | 선택 가능한 차트 유형 제한 |
-| `height` | `number` | 부모 100% | 고정 높이 (px) |
-| `onTimeRangeChange` | `(range) => void` | - | 시간 범위 변경 콜백 |
-| `isEmpty` | `boolean` | `false` | 빈 상태 표시 |
-| `emptyMessage` | `string` | `"데이터가 없습니다"` | 빈 상태 메시지 |
+**필수:**
 
-### controlMode
+| prop | 타입 | 설명 |
+|---|---|---|
+| `data` | `ChartData` | 시리즈 배열 + xAxisType |
+| `chartType` | `ChartType` | 차트 유형 (아래 목록 참고) |
 
-- **`"sidebar"`**: 넓은 패널용. 왼쪽에 200px 사이드바(데이터/스타일 탭). 데이터와 스타일 모두 컨트롤 가능.
-- **`"toolbar"`**: 좁은 패널용. 차트 상단에 제목 + 설정(gear) 아이콘. 설정 클릭 시 모달로 스타일만 편집. 데이터 변경 불가.
-- **`"none"`**: 컨트롤 UI 없이 순수 렌더링만.
+**선택:**
 
-## 차트 유형
+| prop | 타입 | 설명 |
+|---|---|---|
+| `style` | `ChartStyle` | 차트 스타일 (제목, 팔레트, 범례, 축 설정 등) |
+| `onChartTypeChange` | `(type: ChartType) => void` | 차트 유형 변경 콜백 |
+| `onStyleChange` | `(style: ChartStyle) => void` | 스타일 변경 콜백 |
+| `height` | `number` | 차트 높이 (px) |
+| `scenario` | `Scenario` | lightweight/candles 전용 (`"BASE"` / `"BULL"` / `"BEAR"`) |
+| `isEmpty` | `boolean` | 빈 상태 표시 (기본 `false`) |
+| `emptyMessage` | `string` | 빈 상태 메시지 (기본 `"데이터가 없습니다"`) |
 
-### 지원 유형
+> 실제 동작하는 예제는 `app/chart-demo` 참고 (추후 추가)
 
-| ChartType | 데이터 포인트 | X축 | 설명 |
-|-----------|-------------|-----|------|
-| `line` | `CartesianPoint` | datetime, category, numeric | 선 차트 |
-| `area` | `CartesianPoint` | datetime, category, numeric | 영역 차트 |
-| `stacked-area` | `CartesianPoint` | datetime, category | 누적 영역 |
-| `100-stacked-area` | `CartesianPoint` | datetime, category | 100% 누적 영역 |
-| `column` | `CartesianPoint` | datetime, category, numeric | 세로 막대 |
-| `stacked-column` | `CartesianPoint` | category | 누적 막대 |
-| `100-stacked-column` | `CartesianPoint` | category | 100% 누적 막대 |
-| `bar` | `CartesianPoint` | category | 가로 막대 |
-| `stacked-bar` | `CartesianPoint` | category | 누적 가로 막대 |
-| `100-stacked-bar` | `CartesianPoint` | category | 100% 누적 가로 막대 |
-| `candlestick` | `OHLCPoint` | datetime | 캔들스틱 (Highstock) |
-| `scatter` | `ScatterPoint` | numeric | 산점도 |
-| `pie` | `PiePoint` | (없음) | 원형 |
-| `histogram` | `CartesianPoint` | numeric | 히스토그램 |
-| `waterfall` | `WaterfallPoint` | category | 폭포 차트 |
+## 지원 차트 유형
 
-### 포인트 타입
+UI에서 선택 가능한 활성 차트 유형 목록.
 
-```typescript
-// 대부분의 차트
-interface CartesianPoint {
-  x: number | string;  // timestamp, category명, 숫자
-  y: number;
-  color?: string;      // 개별 포인트 색상
-}
+### 기본
 
-// Candlestick
-interface OHLCPoint {
-  x: number;           // timestamp
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-}
+| 차트 유형 | 레이블 | 렌더러 |
+|---|---|---|
+| `line` | Line | Highcharts |
+| `area` | Area | Highcharts |
+| `column` | Column | Highcharts |
+| `bar` | Bar | Highcharts |
+| `pie` | Pie | Highcharts |
+| `scatter` | Scatter | Highcharts |
 
-// Pie
-interface PiePoint {
-  name: string;
-  value: number;
-  color?: string;
-}
+### ChartCore
 
-// Scatter
-interface ScatterPoint {
-  x: number;
-  y: number;
-  size?: number;       // 버블 크기
-  color?: string;
-}
+| 차트 유형 | 레이블 |
+|---|---|
+| `chartCore/line` | Line |
+| `chartCore/column` | Column |
+| `chartCore/stacked` | Stacked Column |
+| `chartCore/stacked-100` | Stacked Column 100% |
+| `chartCore/stacked-grouped` | Grouped Stacked Column |
+| `chartCore/dual-axis` | Dual Axis |
+| `chartCore/dual-axis-stacked-bar` | Dual Axis Stacked Bar |
+| `chartCore/mixed` | Mixed |
+| `chartCore/area` | Area |
+| `chartCore/area-100` | Area 100% |
+| `chartCore/stacked-area` | Stacked Area |
+| `chartCore/synced-area` | Synced Area |
+| `chartCore/pie` | Pie |
+| `chartCore/two-level-pie` | Two-Level Pie |
+| `chartCore/treemap` | Treemap |
+| `chartCore/multi-level-treemap` | Multi-Level Treemap |
+| `chartCore/ranking-bar` | Ranking Bar |
+| `chartCore/geo-grid` | Geo Grid |
+| `chartCore/regression-scatter` | Regression Scatter |
 
-// Waterfall
-interface WaterfallPoint {
-  name: string;
-  y: number;
-  isSum?: boolean;              // 합계 막대
-  isIntermediateSum?: boolean;  // 중간 소계
-  color?: string;
-}
-```
+### Recharts 전용
 
-## 스타일
+| 차트 유형 | 레이블 |
+|---|---|
+| `recharts/grouped-bar` | Grouped Bar |
+| `recharts/ownership-stacked` | Ownership Stacked |
+| `recharts/gauge` | Gauge (Recharts) |
+| `recharts/value-conversion-bridge` | Value Conversion Bridge |
+| `recharts/sankey-diagram` | Sankey Diagram |
+| `recharts/dual-axis-stacked-bar` | Dual Axis Stacked Bar (Recharts) |
+| `recharts/radar` | Radar |
 
-차트 유형에 따라 적용 가능한 스타일이 다르다. `registry.ts`의 `CHART_STYLE_OPTIONS`에서 확인 가능.
+### 특수
 
-```typescript
-// Cartesian 계열 (line, area, column, bar, scatter 등)
-interface CartesianStyle {
-  title?: string;
-  colorPalette?: string[];
-  legend?: { position: "top" | "bottom" | "left" | "right" | "none" };
-  tooltip?: { shared?: boolean; split?: boolean };
-  lineWidth?: number;
-  markerEnabled?: boolean;
-  stacking?: "normal" | "percent";
-  dataLabels?: boolean;
-  yAxes?: YAxisStyle[];
-}
+| 차트 유형 | 레이블 | 렌더러 |
+|---|---|---|
+| `highcharts/gauge` | Highcharts / Gauge | Highcharts |
+| `lightweight/candles` | Candlestick | Lightweight Charts |
+| `core/grid` | Core / Grid | Core |
+| `core/insider-trading` | Core / Insider Trading | Core |
 
-// Pie
-interface PieStyle {
-  title?: string;
-  colorPalette?: string[];
-  innerRadius?: number;     // >0이면 도넛
-  dataLabels?: boolean;
-  showPercentage?: boolean;
-}
+## 더 자세한 정보
 
-// Waterfall
-interface WaterfallStyle {
-  title?: string;
-  positiveColor?: string;   // 양수 막대 (기본: #4ECDC4)
-  negativeColor?: string;   // 음수 막대 (기본: #FF6B6B)
-  sumColor?: string;        // 합계 막대
-  dataLabels?: boolean;
-}
-```
-
-## 어댑터
-
-도메인 데이터를 `ChartData`로 변환하는 함수들.
-
-### stockDataToChartData
-
-```typescript
-import { stockDataToChartData, stockDataDefaultStyle } from "@/packages/chart-lib/adapters";
-
-const chartData = stockDataToChartData(stockData, financialMetrics, {
-  activeIndicators: ["revenue", "per"],
-  seriesVisibility: { stock: true, revenue: true, per: true },
-  showForecast: false,
-});
-
-const style = stockDataDefaultStyle(); // 3개 Y축, legend: none
-```
-
-### documentChartToChartData
-
-```typescript
-import { documentChartToChartData } from "@/packages/chart-lib/adapters";
-
-const { data, chartType, style } = documentChartToChartData(chart);
-
-<DataChart
-  data={data}
-  chartType={chartType}
-  style={style}
-  controlMode="toolbar"
-  height={200}
-/>
-```
-
-## 레지스트리
-
-### CHART_TYPE_REGISTRY
-
-각 차트 유형이 요구하는 데이터 포인트 형식과 지원하는 X축 유형을 정의.
-
-```typescript
-import { CHART_TYPE_REGISTRY } from "@/packages/chart-lib/registry";
-
-const spec = CHART_TYPE_REGISTRY["line"];
-// { pointType: "cartesian", xAxisTypes: ["datetime", "category", "numeric"], ... }
-```
-
-### CHART_STYLE_OPTIONS
-
-각 차트 유형에 적용 가능한 스타일 옵션 목록. 사이드바/모달 UI가 이를 참조하여 동적으로 컨트롤을 표시.
-
-```typescript
-import { CHART_STYLE_OPTIONS } from "@/packages/chart-lib/registry";
-
-const styleSpec = CHART_STYLE_OPTIONS["line"];
-// { styleType: "cartesian", options: ["colorPalette", "lineWidth", "markerEnabled", ...] }
-```
+차트 유형별 데이터 형식, Point 타입, Style 옵션은 [DATA_FORMAT.md](./DATA_FORMAT.md) 참고.
