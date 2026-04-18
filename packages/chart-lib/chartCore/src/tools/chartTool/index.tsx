@@ -842,11 +842,11 @@ export default function ChartToolView({
           groups: [
             {
               id: groupLabel,
-              label: groupLabel,
+              label: seriesLabelMap?.[groupLabel] ?? groupLabel,
               color: isValidHexColor(groupColorOverrides?.[groupLabel]) ? groupColorOverrides![groupLabel]! : parentColor,
               series: treemapStats.seriesData.map((item) => ({
                 id: item.name,
-                label: item.name,
+                label: seriesLabelMap?.[item.name] ?? item.name,
               })),
             },
           ],
@@ -855,11 +855,11 @@ export default function ChartToolView({
 
       const groups = treemapStats.seriesData.map((group, index) => ({
         id: group.name,
-        label: group.name,
+        label: seriesLabelMap?.[group.name] ?? group.name,
         color: resolveGroupLegendColor(group.name, index),
         series: (group.children || []).map((child) => ({
           id: child.name,
-          label: child.name,
+          label: seriesLabelMap?.[child.name] ?? child.name,
         })),
       }));
       if (!groups.length) return null;
