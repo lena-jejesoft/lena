@@ -110,6 +110,7 @@ import {
 import { DataQualityCard } from "./components/data-quality-card";
 import { ChartLegendPanel } from "./components/chart-legend-panel";
 import { HierarchyGroupPanel } from "./components/hierarchy-group-panel";
+import { axisTickFormatter } from "@/packages/chart-lib/utils/number-formatters";
 
 const LEGEND_COLLAPSE_THRESHOLD = 10; // 10개 초과 시 페이지네이션 활성화
 
@@ -1409,13 +1410,7 @@ export default function ChartToolView({
                                 tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
                                 tickLine={false}
                                 axisLine={{ stroke: getAxisLineColor(), strokeWidth: 1.5 }}
-                                tickFormatter={(value) => {
-                                  if (typeof value === "number") {
-                                    if (Math.abs(value) >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
-                                    if (Math.abs(value) >= 1000) return `${(value / 1000).toFixed(1)}K`;
-                                  }
-                                  return value;
-                                }}
+                                tickFormatter={(value) => typeof value === "number" ? axisTickFormatter(value) : value}
                                 label={syncedAreaLeftYAxisLabel
                                   ? {
                                     value: syncedAreaLeftYAxisLabel,
@@ -1475,13 +1470,7 @@ export default function ChartToolView({
                                 tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
                                 tickLine={false}
                                 axisLine={{ stroke: getAxisLineColor(), strokeWidth: 1.5 }}
-                                tickFormatter={(value) => {
-                                  if (typeof value === "number") {
-                                    if (Math.abs(value) >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
-                                    if (Math.abs(value) >= 1000) return `${(value / 1000).toFixed(1)}K`;
-                                  }
-                                  return value;
-                                }}
+                                tickFormatter={(value) => typeof value === "number" ? axisTickFormatter(value) : value}
                                 label={syncedAreaRightYAxisLabel
                                   ? {
                                     value: syncedAreaRightYAxisLabel,
