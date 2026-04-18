@@ -31,7 +31,14 @@ export interface RechartsRankingBarWrapperProps {
   height?: number;
   onTooltipChange?: (payload: any[] | null, label: string | null) => void;
   onRankingDataChange?: (data: Array<{ name: string; value: number }> | null) => void;
+  seriesLabelMap?: Record<string, string>;
 }
+
+/** UUID → 표시용 라벨 매핑 (매핑 없으면 원본). */
+const resolveLabel = (
+  name: string,
+  labelMap?: Record<string, string>
+): string => labelMap?.[name] ?? name;
 
 function getAxisLineColor(): string {
   if (typeof window === "undefined") return "#ffffff";
@@ -108,6 +115,7 @@ export function RechartsRankingBarWrapper({
   height = 400,
   onTooltipChange,
   onRankingDataChange,
+  seriesLabelMap,
 }: RechartsRankingBarWrapperProps) {
   const timepointList = useMemo(() => timepointData ?? [], [timepointData]);
   // 시점 모드 여부 (timepointData가 있고 2개 이상일 때)
@@ -147,29 +155,35 @@ export function RechartsRankingBarWrapper({
     }
   }, [isTimepointMode, selectedTimepoint, onTooltipChange]);
 
-  // 시점 선택 시 랭킹 데이터 업데이트
+  // 시점 선택 시 랭킹 데이터 업데이트 — name 을 seriesLabelMap 으로 변환해서 전달
   useEffect(() => {
     if (isTimepointMode && selectedTimepoint && onRankingDataChange) {
       const selected = timepointList.find((tp) => tp.timepoint === selectedTimepoint);
       if (selected) {
-        onRankingDataChange(selected.data);
+        onRankingDataChange(
+          selected.data.map((d) => ({ name: resolveLabel(d.name, seriesLabelMap), value: d.value }))
+        );
       }
     }
-  }, [isTimepointMode, selectedTimepoint, timepointList, onRankingDataChange]);
+  }, [isTimepointMode, selectedTimepoint, timepointList, onRankingDataChange, seriesLabelMap]);
 
-  // 활성 데이터 (시점 모드면 선택된 시점의 데이터, 아니면 원본)
+  // 활성 데이터 (시점 모드면 선택된 시점의 데이터, 아니면 원본). name 을 표시용으로 변환.
   const activeData = useMemo(() => {
     if (isTimepointMode && selectedTimepoint) {
       const selected = timepointList.find((tp) => tp.timepoint === selectedTimepoint);
       if (selected) {
         return selected.data.map((item) => ({
-          [xField]: item.name,
+          [xField]: resolveLabel(item.name, seriesLabelMap),
           [yField]: item.value,
         }));
       }
     }
-    return data;
-  }, [isTimepointMode, selectedTimepoint, timepointList, data, xField, yField]);
+    return data.map((row) => {
+      const raw = row[xField];
+      if (typeof raw !== "string") return row;
+      return { ...row, [xField]: resolveLabel(raw, seriesLabelMap) };
+    });
+  }, [isTimepointMode, selectedTimepoint, timepointList, data, xField, yField, seriesLabelMap]);
 
   const sortedData = useMemo(() => {
     return [...activeData].sort((a, b) => {

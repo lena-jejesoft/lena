@@ -582,7 +582,7 @@ export function ChartLegendPanel({
                               style={{ backgroundColor: markerColor }}
                             />
                             <span className="text-xs text-muted-foreground flex-shrink-0">{actualRank}위</span>
-                            <span className="text-xs text-foreground truncate">{item.name}</span>
+                            <span className="text-xs text-foreground truncate" title={getSeriesLabel(item.name)}>{getSeriesLabel(item.name)}</span>
                           </div>
                           <span
                             className="text-xs font-medium text-muted-foreground flex-shrink-0"

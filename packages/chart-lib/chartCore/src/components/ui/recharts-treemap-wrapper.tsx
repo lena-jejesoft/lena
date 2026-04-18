@@ -15,7 +15,14 @@ export interface RechartsTreemapWrapperProps {
   height?: number;
   allSeriesFields: string[];
   onTooltipChange?: (payload: any[] | null, label: string | null) => void;
+  seriesLabelMap?: Record<string, string>;
 }
+
+/** UUID → 표시용 라벨 (매핑 없으면 원본). */
+const resolveLabel = (
+  name: string,
+  labelMap?: Record<string, string>
+): string => labelMap?.[name] ?? name;
 
 interface CustomContentProps {
   x?: number;
@@ -32,13 +39,14 @@ interface CustomContentProps {
   seriesName?: string;
   onTooltipChange?: (payload: any[] | null, label: string | null) => void;
   filteredData?: TreemapDataItem[];
+  seriesLabelMap?: Record<string, string>;
 }
 
 const CustomizedContent: React.FC<CustomContentProps> = (props) => {
   const {
     x = 0, y = 0, width = 0, height = 0, depth = 0,
     name, index = 0, colors, allSeriesFields,
-    seriesName, onTooltipChange, filteredData
+    seriesName, onTooltipChange, filteredData, seriesLabelMap
   } = props;
 
   // depth=1: 시리즈 노드, depth=2: 값 노드
@@ -113,7 +121,7 @@ const CustomizedContent: React.FC<CustomContentProps> = (props) => {
             const charWidth = 7;
             const padding = 16; // 좌우 여백
             const maxChars = Math.floor((width - padding) / charWidth);
-            const displayName = name || "";
+            const displayName = resolveLabel(name || "", seriesLabelMap);
             if (displayName.length > maxChars && maxChars > 3) {
               return displayName.slice(0, maxChars - 2) + "..";
             }
@@ -133,6 +141,7 @@ export function RechartsTreemapWrapper({
   height = 400,
   allSeriesFields,
   onTooltipChange,
+  seriesLabelMap,
 }: RechartsTreemapWrapperProps) {
   const [selectedTimepoint, setSelectedTimepoint] = useState<string | null>(null);
 
@@ -238,6 +247,7 @@ export function RechartsTreemapWrapper({
                 allSeriesFields={allSeriesFields}
                 onTooltipChange={onTooltipChange}
                 filteredData={filteredData}
+                seriesLabelMap={seriesLabelMap}
               />
             }
           />
@@ -261,6 +271,7 @@ export function RechartsTreemapWrapper({
             allSeriesFields={allSeriesFields}
             onTooltipChange={onTooltipChange}
             filteredData={filteredData}
+            seriesLabelMap={seriesLabelMap}
           />
         }
       />

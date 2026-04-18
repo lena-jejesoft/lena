@@ -38,7 +38,14 @@ export interface RechartsMultiLevelTreemapWrapperProps {
   onTooltipChange?: (payload: any[] | null, label: string | null) => void;
   onDrilldownChange?: (stats: TreemapStats | null) => void;
   customColors?: string[];  // 커스텀 색상 팔레트
+  seriesLabelMap?: Record<string, string>;
 }
+
+/** UUID → 표시용 라벨 (매핑 없으면 원본). */
+const resolveLabel = (
+  name: string,
+  labelMap?: Record<string, string>
+): string => labelMap?.[name] ?? name;
 
 interface DrilldownState {
   level: 1 | 2 | 3;  // 드릴다운 레벨: 1=전체그룹, 2=그룹내시리즈, 3=단일시리즈
@@ -69,6 +76,7 @@ interface CustomContentProps {
   selectedTimepoint?: string | null;  // 시점 모드에서 선택된 시점
   parentColor?: string;  // 드릴다운 상태에서 부모 색상
   level3Color?: string;  // 3단계에서 사용할 미리 계산된 색상
+  seriesLabelMap?: Record<string, string>;
 }
 
 // 색상 밝기 조절 함수 (드릴다운 그라데이션용)
@@ -131,7 +139,7 @@ const CustomizedContent: React.FC<CustomContentProps> = (props) => {
     x = 0, y = 0, width = 0, height = 0,
     name, index = 0, colors, allSeriesFields,
     size, seriesName, children, onNodeClick, onTooltipChange, isDrilledDown, totalSize = 0, filteredData,
-    selectedTimepoint, parentColor, level3Color
+    selectedTimepoint, parentColor, level3Color, seriesLabelMap
   } = props;
 
   const hasChildren = children && children.length > 0;
@@ -157,9 +165,9 @@ const CustomizedContent: React.FC<CustomContentProps> = (props) => {
   // 비중 계산
   const percentage = totalSize > 0 ? ((size || 0) / totalSize * 100).toFixed(1) : "0.0";
 
-  // 텍스트 영역 너비 (좌우 패딩 16px 제외)
+  // 텍스트 영역 너비 (좌우 패딩 16px 제외) — UUID 를 seriesLabelMap 으로 변환 후 truncate
   const textMaxWidth = width - 16;
-  const displayName = truncateText(name || '', textMaxWidth, 12);
+  const displayName = truncateText(resolveLabel(name || '', seriesLabelMap), textMaxWidth, 12);
 
   const handleClick = useCallback(() => {
     if (onNodeClick) {
@@ -278,6 +286,7 @@ export function RechartsMultiLevelTreemapWrapper({
   onTooltipChange,
   onDrilldownChange,
   customColors,
+  seriesLabelMap,
 }: RechartsMultiLevelTreemapWrapperProps) {
   // custom > theme > 기본 순으로 팔레트를 선택해 외부 색상 제어를 반영한다.
   const baseColors = useMemo(() => {
@@ -632,6 +641,7 @@ export function RechartsMultiLevelTreemapWrapper({
                 selectedTimepoint={selectedTimepoint}
                 parentColor={parentColor}
                 level3Color={level3Color}
+                seriesLabelMap={seriesLabelMap}
               />
             }
           />

@@ -1287,6 +1287,7 @@ export default function ChartToolView({
                       setTooltipPayload(payload);
                       setHoveredLabel(label);
                     }}
+                    seriesLabelMap={seriesLabelMap}
                   />
                 ) : chartType === "multi-level-treemap" ? (
                   // 멀티레벨 트리맵 차트
@@ -1303,6 +1304,7 @@ export default function ChartToolView({
                     }}
                     onDrilldownChange={setTreemapStats}
                     customColors={multiLevelTreemapColors}
+                    seriesLabelMap={seriesLabelMap}
                   />
                 ) : chartType === "ranking-bar" ? (
                   // 랭킹막대 차트
@@ -1318,6 +1320,7 @@ export default function ChartToolView({
                       setHoveredLabel(label);
                     }}
                     onRankingDataChange={setCurrentRankingData}
+                    seriesLabelMap={seriesLabelMap}
                   />
                 ) : chartType === "geo-grid" ? (
                   // 지도그리드 차트
