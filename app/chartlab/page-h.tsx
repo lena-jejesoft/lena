@@ -3850,10 +3850,12 @@ function Phase3Screen() {
                       {chartTypeOptionsForControl.map((option) => {
                         const isCurrent = option.value === activeBlock.chartType
                         const isCompatible = compatibleTypeSet.has(option.value)
-                        const isDisabled = !isCurrent && !isCompatible
+                        const isWip = "wip" in option && option.wip === true
+                        const isDisabled = !isCurrent && (!isCompatible || isWip)
+                        const suffix = isWip ? " (개발 중)" : (isDisabled ? " (호환 불가)" : "")
                         return (
                           <SelectItem key={option.value} value={option.value} disabled={isDisabled}>
-                            {option.label}{isDisabled ? " (호환 불가)" : ""}
+                            {option.label}{suffix}
                           </SelectItem>
                         )
                       })}

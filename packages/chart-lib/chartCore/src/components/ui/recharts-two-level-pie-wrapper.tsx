@@ -208,6 +208,7 @@ const renderTwoLevelActiveShape = (
   totalSum: number,
   labelMap?: Record<string, string>,
   groupKeyField: "name" | "series" = "series",
+  groupSums?: Map<string, number>,
 ) => {
   const RADIAN = Math.PI / 180;
   const {
@@ -223,8 +224,14 @@ const renderTwoLevelActiveShape = (
     value,
   } = props;
 
-  // 전체 합계 기준으로 비율 계산
-  const percent = totalSum > 0 ? (value ?? 0) / totalSum : 0;
+  // 그룹 식별자(outer.name 또는 outer.series)를 labelMap으로 변환해 그룹 단위 콜아웃 라벨로 표시.
+  const rawGroupKey = payload?.[groupKeyField] ?? payload?.name;
+  const displayName = resolveDisplayName(rawGroupKey, labelMap);
+  const truncatedName = displayName.length > 10 ? `${displayName.slice(0, 10)}...` : displayName;
+
+  // 콜아웃 값/비율: groupSums 가 있으면 그룹 합계 기준, 없으면 개별 섹터 값 기준.
+  const displayValue = (groupSums && rawGroupKey) ? (groupSums.get(rawGroupKey) ?? value ?? 0) : (value ?? 0);
+  const percent = totalSum > 0 ? displayValue / totalSum : 0;
 
   const sin = Math.sin(-RADIAN * (midAngle ?? 0));
   const cos = Math.cos(-RADIAN * (midAngle ?? 0));
@@ -236,14 +243,9 @@ const renderTwoLevelActiveShape = (
   const ey = my;
   const textAnchor = cos >= 0 ? "start" : "end";
 
-  // 그룹 식별자(outer.name 또는 outer.series)를 labelMap으로 변환해 그룹 단위 콜아웃 라벨로 표시.
-  const rawGroupKey = payload?.[groupKeyField] ?? payload?.name;
-  const displayName = resolveDisplayName(rawGroupKey, labelMap);
-  const truncatedName = displayName.length > 10 ? `${displayName.slice(0, 10)}...` : displayName;
-
   return (
     <g>
-      {/* 기본 섹터 */}
+      {/* 기본 섹터 (외곽선 강조) */}
       <Sector
         cx={cx}
         cy={cy}
@@ -252,6 +254,8 @@ const renderTwoLevelActiveShape = (
         startAngle={startAngle}
         endAngle={endAngle}
         fill={fill}
+        stroke="hsl(var(--background))"
+        strokeWidth={2}
       />
       {/* 외부 링 강조 */}
       <Sector
@@ -259,7 +263,7 @@ const renderTwoLevelActiveShape = (
         cy={cy}
         startAngle={startAngle}
         endAngle={endAngle}
-        innerRadius={(outerRadius ?? 0) + 6}
+        innerRadius={(outerRadius ?? 0) + 4}
         outerRadius={(outerRadius ?? 0) + 10}
         fill={fill}
       />
@@ -274,7 +278,7 @@ const renderTwoLevelActiveShape = (
         textAnchor={textAnchor}
         style={{ fill: "hsl(var(--foreground))", fontSize: 11 }}
       >
-        {truncatedName}: {(value ?? 0).toLocaleString()}
+        {truncatedName}: {displayValue.toLocaleString()}
       </text>
       {/* 비율 텍스트 */}
       <text
@@ -549,13 +553,14 @@ export function RechartsTwoLevelPieWrapper({
 
   const getOuterFillColor = useCallback(
     (entry: TwoLevelPieOuterDataItem): string => {
-      if (isGroupInnerMode) {
-        return getGroupedSeriesColor(entry.name, entry.series);
-      }
-
-      // Mode 1 (사용자 그룹): 외부 링은 그룹당 단일 색. 시리즈별 명도 조정 없음.
+      // Mode 1 (사용자 그룹)을 최우선 — 같은 group name 을 공유하는 모든 섹터가
+      // 동일한 base color. 명도 조정 없음.
       if (groupKeyField === "name") {
         return getGroupBaseColor(entry.name);
+      }
+
+      if (isGroupInnerMode) {
+        return getGroupedSeriesColor(entry.name, entry.series);
       }
 
       // Mode 2/3: 기존 로직 유지 (series = level1/field 기반 공통 색).
@@ -642,7 +647,7 @@ export function RechartsTwoLevelPieWrapper({
             innerRadius="60%"
             outerRadius="80%"
             activeIndex={isThisSeriesActive ? activeOuterIndex : undefined}
-            activeShape={(props) => renderTwoLevelActiveShape(props, allOuterSum, seriesLabelMap, groupKeyField)}
+            activeShape={(props) => renderTwoLevelActiveShape(props, allOuterSum, seriesLabelMap, groupKeyField, groupSums)}
             label={isFirstInGroup
               ? (props) => renderTwoLevelDefaultLabel(props, 0.01, isAnyHovered, allOuterSum, groupName, groupSum, seriesLabelMap)
               : false

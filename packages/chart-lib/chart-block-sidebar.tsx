@@ -151,9 +151,17 @@ function SidebarDataTab({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {CHART_TYPE_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-            ))}
+            {CHART_TYPE_OPTIONS.map((option) => {
+              const isCurrent = option.value === block.chartType;
+              const isWip = option.wip === true;
+              const isDisabled = !isCurrent && isWip;
+              const suffix = isWip ? " (개발 중)" : "";
+              return (
+                <SelectItem key={option.value} value={option.value} disabled={isDisabled}>
+                  {option.label}{suffix}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
 
