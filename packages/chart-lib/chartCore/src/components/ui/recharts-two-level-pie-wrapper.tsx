@@ -37,6 +37,47 @@ export interface RechartsTwoLevelPieWrapperProps {
   height?: number;
   allSeriesFields: string[];
   onTooltipChange?: (payload: any[] | null, label: string | null) => void;
+  seriesLabelMap?: Record<string, string>;  // field(id) → 표시용 레이블 매핑 (없으면 원본 사용)
+}
+
+/** 표시용 레이블 해석: map이 있으면 매핑, 없으면 name 그대로 */
+const resolveDisplayName = (
+  name: string | undefined,
+  labelMap?: Record<string, string>
+): string => {
+  if (!name) return "";
+  return labelMap?.[name] ?? name;
+};
+
+/**
+ * 색상에 alpha 적용 (hsl, hex 모두 지원).
+ * Recharts가 <Cell fillOpacity>를 DOM에 반영하지 않아 fill 자체에 투명도를 섞어준다.
+ */
+function applyAlpha(color: string, alpha: number): string {
+  if (alpha >= 1) return color;
+  // hsl(h s% l%) — CSS Color Level 4 (공백 구분). 호환성 위해 legacy hsla()로 변환.
+  const hslModern = color.match(/^hsl\(([\d.]+)\s+([\d.]+)%\s+([\d.]+)%\)$/);
+  if (hslModern) {
+    return `hsla(${hslModern[1]}, ${hslModern[2]}%, ${hslModern[3]}%, ${alpha})`;
+  }
+  // hsl(h, s%, l%) — 레거시 (쉼표 구분)
+  const hslLegacy = color.match(/^hsl\(\s*([\d.]+)\s*,\s*([\d.]+)%\s*,\s*([\d.]+)%\s*\)$/);
+  if (hslLegacy) {
+    return `hsla(${hslLegacy[1]}, ${hslLegacy[2]}%, ${hslLegacy[3]}%, ${alpha})`;
+  }
+  // #RGB or #RRGGBB
+  if (color.startsWith("#")) {
+    const hex = color.length === 4
+      ? color.slice(1).split("").map((c) => c + c).join("")
+      : color.slice(1, 7);
+    const r = parseInt(hex.slice(0, 2), 16);
+    const g = parseInt(hex.slice(2, 4), 16);
+    const b = parseInt(hex.slice(4, 6), 16);
+    if (!Number.isNaN(r) && !Number.isNaN(g) && !Number.isNaN(b)) {
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+  }
+  return color;
 }
 
 /**
@@ -72,7 +113,8 @@ const renderTwoLevelDefaultLabel = (
   isAnyHovered: boolean,
   totalSum: number,
   groupName?: string,
-  groupSum?: number
+  groupSum?: number,
+  labelMap?: Record<string, string>
 ) => {
   const { cx, cy, midAngle, outerRadius, value, name, fill, index } = props;
 
@@ -107,10 +149,9 @@ const renderTwoLevelDefaultLabel = (
           y={ey}
           textAnchor={textAnchor}
           dominantBaseline="central"
-          className="fill-foreground"
-          style={{ fontSize: 11 }}
+          style={{ fill: "hsl(var(--foreground))", fontSize: 11 }}
         >
-          {`${groupName} (${(groupPercent * 100).toFixed(1)}%)`}
+          {`${resolveDisplayName(groupName, labelMap)} (${(groupPercent * 100).toFixed(1)}%)`}
         </text>
       </g>
     );
@@ -153,17 +194,21 @@ const renderTwoLevelDefaultLabel = (
         y={ey}
         textAnchor={textAnchor}
         dominantBaseline="central"
-        className="fill-foreground"
-        style={{ fontSize: 11 }}
+        style={{ fill: "hsl(var(--foreground))", fontSize: 11 }}
       >
-        {`${name} (${(percent * 100).toFixed(1)}%)`}
+        {`${resolveDisplayName(name, labelMap)} (${(percent * 100).toFixed(1)}%)`}
       </text>
     </g>
   );
 };
 
 /** 호버 시 활성 섹터 렌더러 */
-const renderTwoLevelActiveShape = (props: any, totalSum: number) => {
+const renderTwoLevelActiveShape = (
+  props: any,
+  totalSum: number,
+  labelMap?: Record<string, string>,
+  groupKeyField: "name" | "series" = "series",
+) => {
   const RADIAN = Math.PI / 180;
   const {
     cx,
@@ -191,8 +236,9 @@ const renderTwoLevelActiveShape = (props: any, totalSum: number) => {
   const ey = my;
   const textAnchor = cos >= 0 ? "start" : "end";
 
-  // 시리즈명 말줄임 (최대 10자) - series가 있으면 시리즈명, 없으면 name 사용
-  const displayName = payload?.series || payload?.name || "";
+  // 그룹 식별자(outer.name 또는 outer.series)를 labelMap으로 변환해 그룹 단위 콜아웃 라벨로 표시.
+  const rawGroupKey = payload?.[groupKeyField] ?? payload?.name;
+  const displayName = resolveDisplayName(rawGroupKey, labelMap);
   const truncatedName = displayName.length > 10 ? `${displayName.slice(0, 10)}...` : displayName;
 
   return (
@@ -226,8 +272,7 @@ const renderTwoLevelActiveShape = (props: any, totalSum: number) => {
         x={ex + (cos >= 0 ? 1 : -1) * 8}
         y={ey}
         textAnchor={textAnchor}
-        className="fill-foreground"
-        style={{ fontSize: 11 }}
+        style={{ fill: "hsl(var(--foreground))", fontSize: 11 }}
       >
         {truncatedName}: {(value ?? 0).toLocaleString()}
       </text>
@@ -237,8 +282,7 @@ const renderTwoLevelActiveShape = (props: any, totalSum: number) => {
         y={ey}
         dy={14}
         textAnchor={textAnchor}
-        className="fill-muted-foreground"
-        style={{ fontSize: 10 }}
+        style={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
       >
         {`(${((percent ?? 0) * 100).toFixed(1)}%)`}
       </text>
@@ -255,12 +299,15 @@ export function RechartsTwoLevelPieWrapper({
   height = 400,
   allSeriesFields,
   onTooltipChange,
+  seriesLabelMap,
 }: RechartsTwoLevelPieWrapperProps) {
   const [selectedTimepointOverride, setSelectedTimepointOverride] = useState<string | null>(null);
   const timepointList = useMemo(() => timepointData ?? [], [timepointData]);
   // 외부 링 호버 인덱스 (series별로 관리)
   const [activeOuterKey, setActiveOuterKey] = useState<string | null>(null);
   const [activeOuterIndex, setActiveOuterIndex] = useState<number | undefined>(undefined);
+  // 외부 링 호버 시 강조할 그룹 키 (outer.name 중복 여부로 결정되는 group key)
+  const [activeGroupKey, setActiveGroupKey] = useState<string | null>(null);
 
   // 2단계 원형 차트 전용 색상 사용
   const colors = useMemo(() => {
@@ -379,6 +426,46 @@ export function RechartsTwoLevelPieWrapper({
     return Array.from(new Set(filteredOuterData.map((item) => item.name)));
   }, [filteredOuterData]);
 
+  // outer.name이 중복되면 Mode 1 (사용자 그룹), 아니면 series가 그룹 역할 (Mode 2/3)
+  const groupKeyField: "name" | "series" = useMemo(() => {
+    const names = filteredOuterData.map((d) => d.name);
+    return names.length > new Set(names).size ? "name" : "series";
+  }, [filteredOuterData]);
+
+  const getGroupKey = useCallback(
+    (item: TwoLevelPieOuterDataItem): string => item[groupKeyField],
+    [groupKeyField]
+  );
+
+  // inner series name → group key 매핑 (inner Cell opacity 제어용)
+  const seriesToGroupKey = useMemo(() => {
+    const map = new Map<string, string>();
+    filteredOuterData.forEach((item) => {
+      map.set(item.series, getGroupKey(item));
+    });
+    return map;
+  }, [filteredOuterData, getGroupKey]);
+
+  // Cell opacity 계산 (호버된 그룹만 선명, 나머지는 흐리게)
+  const getOuterOpacity = useCallback(
+    (entry: TwoLevelPieOuterDataItem): number => {
+      if (activeGroupKey === null) return 1;
+      return getGroupKey(entry) === activeGroupKey ? 1 : 0.3;
+    },
+    [activeGroupKey, getGroupKey]
+  );
+
+  const getInnerOpacity = useCallback(
+    (entry: TwoLevelPieInnerDataItem): number => {
+      if (activeGroupKey === null) return 1;
+      if (isGroupInnerMode) {
+        return entry.name === activeGroupKey ? 1 : 0.3;
+      }
+      return seriesToGroupKey.get(entry.name) === activeGroupKey ? 1 : 0.3;
+    },
+    [activeGroupKey, isGroupInnerMode, seriesToGroupKey]
+  );
+
   const getOuterGroupNameForInner = useCallback(
     (innerName: string): string | undefined => {
       if (isGroupInnerMode) return innerName;
@@ -442,13 +529,22 @@ export function RechartsTwoLevelPieWrapper({
         return adjustLightness(getGroupBaseColor(innerName), -15);
       }
 
-      const groupName = filteredOuterData.find((item) => item.series === innerName)?.name;
-      if (groupName && /^그룹\d+$/.test(groupName)) {
-        return getGroupedSeriesColor(groupName, innerName);
+      // Mode 1 (사용자 그룹): 내부 링은 시리즈별 고유 색 (그룹 hue와 독립).
+      // allSeriesFields는 그룹명 리스트이므로 getColorForSeries가 fallback 0으로만 반환.
+      // 그래서 filteredInnerData 순서 기반으로 팔레트 인덱스를 계산하고, 그룹 수만큼
+      // 시프트해 외부 그룹 색과 겹치지 않게 한다.
+      if (groupKeyField === "name") {
+        const seriesIdx = filteredInnerData.findIndex((item) => item.name === innerName);
+        const paletteIdx = seriesIdx >= 0
+          ? (groupedOuterNames.length + seriesIdx) % colors.length
+          : 0;
+        return adjustLightness(colors[paletteIdx], -15);
       }
+
+      // Mode 2/3: 기존 로직 유지 (level1/field 기반 공통 색).
       return adjustLightness(getColorForSeries(innerName), -15);
     },
-    [isGroupInnerMode, getGroupBaseColor, filteredOuterData, getGroupedSeriesColor, getColorForSeries]
+    [isGroupInnerMode, getGroupBaseColor, groupKeyField, filteredInnerData, groupedOuterNames, colors, getColorForSeries]
   );
 
   const getOuterFillColor = useCallback(
@@ -457,14 +553,15 @@ export function RechartsTwoLevelPieWrapper({
         return getGroupedSeriesColor(entry.name, entry.series);
       }
 
-      const groupName = entry.name;
-      const isGroupPattern = /^그룹\d+$/.test(groupName || "");
-      if (isGroupPattern) {
-        return getGroupedSeriesColor(groupName, entry.series);
+      // Mode 1 (사용자 그룹): 외부 링은 그룹당 단일 색. 시리즈별 명도 조정 없음.
+      if (groupKeyField === "name") {
+        return getGroupBaseColor(entry.name);
       }
+
+      // Mode 2/3: 기존 로직 유지 (series = level1/field 기반 공통 색).
       return adjustLightness(getColorForSeries(entry.series), -15);
     },
-    [isGroupInnerMode, getGroupedSeriesColor, getColorForSeries]
+    [isGroupInnerMode, getGroupedSeriesColor, groupKeyField, getGroupBaseColor, getColorForSeries]
   );
 
   const groupSums = useMemo(() => {
@@ -503,6 +600,7 @@ export function RechartsTwoLevelPieWrapper({
     onTooltipChange?.(null, null);
     setActiveOuterKey(null);
     setActiveOuterIndex(undefined);
+    setActiveGroupKey(null);
   }, [onTooltipChange]);
 
   // 전체 외부 데이터 합계 계산 (라벨 표시 조건용)
@@ -512,9 +610,12 @@ export function RechartsTwoLevelPieWrapper({
 
   const renderInnerCells = useCallback(() => {
     return filteredInnerData.map((entry) => (
-      <Cell key={`inner-${entry.name}`} fill={getInnerFillColor(entry.name)} />
+      <Cell
+        key={`inner-${entry.name}`}
+        fill={applyAlpha(getInnerFillColor(entry.name), getInnerOpacity(entry))}
+      />
     ));
-  }, [filteredInnerData, getInnerFillColor]);
+  }, [filteredInnerData, getInnerFillColor, getInnerOpacity]);
 
   const renderOuterPies = useCallback(
     (useTimepointLabel: boolean) => {
@@ -541,9 +642,9 @@ export function RechartsTwoLevelPieWrapper({
             innerRadius="60%"
             outerRadius="80%"
             activeIndex={isThisSeriesActive ? activeOuterIndex : undefined}
-            activeShape={(props) => renderTwoLevelActiveShape(props, allOuterSum)}
+            activeShape={(props) => renderTwoLevelActiveShape(props, allOuterSum, seriesLabelMap, groupKeyField)}
             label={isFirstInGroup
-              ? (props) => renderTwoLevelDefaultLabel(props, 0.01, isAnyHovered, allOuterSum, groupName, groupSum)
+              ? (props) => renderTwoLevelDefaultLabel(props, 0.01, isAnyHovered, allOuterSum, groupName, groupSum, seriesLabelMap)
               : false
             }
             labelLine={false}
@@ -557,13 +658,14 @@ export function RechartsTwoLevelPieWrapper({
               }
               setActiveOuterKey(seriesAngle.name);
               setActiveOuterIndex(index);
+              if (item) setActiveGroupKey(getGroupKey(item));
             }}
             onMouseLeave={onPieLeave}
           >
             {seriesOuterData.map((entry, idx) => (
               <Cell
                 key={`outer-${entry.name}-${idx}`}
-                fill={getOuterFillColor(entry)}
+                fill={applyAlpha(getOuterFillColor(entry), getOuterOpacity(entry))}
               />
             ))}
           </Pie>
@@ -583,6 +685,10 @@ export function RechartsTwoLevelPieWrapper({
       selectedTimepoint,
       onPieLeave,
       getOuterFillColor,
+      getOuterOpacity,
+      getGroupKey,
+      groupKeyField,
+      seriesLabelMap,
     ]
   );
 

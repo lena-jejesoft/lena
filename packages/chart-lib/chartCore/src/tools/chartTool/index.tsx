@@ -677,59 +677,11 @@ export default function ChartToolView({
     return calculateTwoLevelPieDataByTimepoint(chartData, seriesFields, hierarchyGroups);
   }, [chartType, chartData, seriesFields, hierarchyGroups]);
 
-  // 그룹에 할당된 시리즈가 있으면 내부 원을 그룹 합계 기준으로 렌더링
-  const hasAssignedHierarchySeries = useMemo(() => {
-    if (chartType !== "two-level-pie") return false;
-    return hierarchyGroups.some((group) => group.series.length > 0);
-  }, [chartType, hierarchyGroups]);
-
-  // 레전드 계산은 원본 데이터를 유지하고, 렌더링에만 그룹 내부 원을 적용
-  const twoLevelPieRenderData = useMemo(() => {
-    if (!hasAssignedHierarchySeries) return twoLevelPieData;
-
-    const groupOrder: string[] = [];
-    const groupSums = new Map<string, number>();
-
-    twoLevelPieData.outerData.forEach((item) => {
-      if (!groupSums.has(item.name)) {
-        groupOrder.push(item.name);
-      }
-      groupSums.set(item.name, (groupSums.get(item.name) || 0) + item.value);
-    });
-
-    return {
-      innerData: groupOrder.map((groupName) => ({
-        name: groupName,
-        value: groupSums.get(groupName) || 0,
-      })),
-      outerData: twoLevelPieData.outerData,
-    };
-  }, [hasAssignedHierarchySeries, twoLevelPieData]);
-
-  // 시점 모드에서도 같은 기준으로 내부 원만 그룹 합계로 변환
-  const twoLevelPieRenderTimepointData = useMemo(() => {
-    if (!hasAssignedHierarchySeries) return twoLevelPieTimepointData;
-
-    return twoLevelPieTimepointData.map((timepointItem) => {
-      const groupOrder: string[] = [];
-      const groupSums = new Map<string, number>();
-
-      timepointItem.outerData.forEach((item) => {
-        if (!groupSums.has(item.name)) {
-          groupOrder.push(item.name);
-        }
-        groupSums.set(item.name, (groupSums.get(item.name) || 0) + item.value);
-      });
-
-      return {
-        ...timepointItem,
-        innerData: groupOrder.map((groupName) => ({
-          name: groupName,
-          value: groupSums.get(groupName) || 0,
-        })),
-      };
-    });
-  }, [hasAssignedHierarchySeries, twoLevelPieTimepointData]);
+  // 렌더링용 데이터 = 원본 그대로 (내부 원은 시리즈별 조각으로 유지).
+  // 과거에는 그룹 할당 시 내부 원을 그룹 합계로 덮어씌웠으나,
+  // 이는 외부·내부가 동일 구조로 보이는 문제를 야기해 제거함.
+  const twoLevelPieRenderData = twoLevelPieData;
+  const twoLevelPieRenderTimepointData = twoLevelPieTimepointData;
 
   // 트리맵 차트 데이터
   const treemapData = useMemo(() => {
@@ -832,34 +784,41 @@ export default function ChartToolView({
   const chartCoreLegendMeta = useMemo<ChartCoreLegendMetaPayload | null>(() => {
     if (chartType === "two-level-pie") {
       const outerData = twoLevelPieRenderData.outerData;
-      const innerData = twoLevelPieRenderData.innerData;
-      if (!outerData.length || !innerData.length) return null;
+      if (!outerData.length) return null;
 
-      const outerNames = new Set(outerData.map((item) => item.name));
-      const outerSeries = new Set(outerData.map((item) => item.series));
-      const hasNameMatch = innerData.some((item) => outerNames.has(item.name));
-      const hasSeriesMatch = innerData.some((item) => outerSeries.has(item.name));
-      const isGroupedMode = hasNameMatch && !hasSeriesMatch;
+      // Mode 1 (사용자 그룹) 감지: outerData.name 이 중복되면 그룹핑이 있다는 뜻.
+      // wrapper 의 groupKeyField 판정과 동일한 패턴.
+      const names = outerData.map((item) => item.name);
+      const isGroupedMode = names.length > new Set(names).size;
       if (!isGroupedMode) return null;
 
+      const orderedGroupNames: string[] = [];
+      const seenGroupNames = new Set<string>();
+      for (const name of names) {
+        if (!seenGroupNames.has(name)) {
+          seenGroupNames.add(name);
+          orderedGroupNames.push(name);
+        }
+      }
+
       const groups: ChartCoreLegendGroupPayload[] = [];
-      innerData.forEach((item, index) => {
+      orderedGroupNames.forEach((groupName, index) => {
         const childSeries = Array.from(
           new Set(
             outerData
-              .filter((outerItem) => outerItem.name === item.name)
+              .filter((outerItem) => outerItem.name === groupName)
               .map((outerItem) => outerItem.series)
               .filter((seriesName) => Boolean(seriesName))
           )
         );
         if (!childSeries.length) return;
         groups.push({
-          id: item.name,
-          label: item.name,
-          color: resolveGroupLegendColor(item.name, index),
+          id: groupName,
+          label: seriesLabelMap?.[groupName] ?? groupName,
+          color: resolveGroupLegendColor(groupName, index),
           series: childSeries.map((seriesName) => ({
             id: seriesName,
-            label: seriesName,
+            label: seriesLabelMap?.[seriesName] ?? seriesName,
           })),
         });
       });
@@ -917,6 +876,7 @@ export default function ChartToolView({
     treemapStats,
     groupColorOverrides,
     resolveGroupLegendColor,
+    seriesLabelMap,
   ]);
 
   const legendMetaSignatureRef = useRef<string>("");
@@ -1291,6 +1251,7 @@ export default function ChartToolView({
                     themeColors={chartThemeColors}
                     height={400}
                     allSeriesFields={twoLevelPieSeriesFields}
+                    seriesLabelMap={seriesLabelMap}
                     onTooltipChange={(payload, label) => {
                       setTooltipPayload(payload);
                       setHoveredLabel(label);

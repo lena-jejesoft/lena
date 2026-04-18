@@ -976,7 +976,7 @@ export function ChartLegendPanel({
                               className="w-3 h-3 rounded-sm flex-shrink-0"
                               style={{ backgroundColor: seriesColors[groupIdx % seriesColors.length] }}
                             />
-                            <span className="text-sm font-medium truncate">{group.name}</span>
+                            <span className="text-sm font-medium truncate" title={getSeriesLabel(group.name)}>{getSeriesLabel(group.name)}</span>
                           </div>
                           <div className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
                             {groupTotal.toLocaleString()} ({groupPercentage.toFixed(1)}%)
