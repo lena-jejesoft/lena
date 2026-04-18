@@ -10,6 +10,12 @@ import { cn } from "@chartCore/src/lib/utils";
 import { interpolateColor } from "@chartCore/src/components/ui/recharts-ranking-bar-wrapper";
 import type { TimepointTwoLevelPieData } from "@chartCore/src/components/ui/recharts-two-level-pie-wrapper";
 import { hexToHsl } from "@/lib/colors";
+import {
+  formatFull,
+  formatLegendValue,
+  formatPercent,
+  formatStat,
+} from "@/packages/chart-lib/utils/number-formatters";
 
 // 레전드용 랭킹 색상 - Anthropic 브랜드 기반 (Crail)
 const RANKING_LEGEND_COLOR_START = "#C15F3C";  // Crail (진한 러스트 오렌지)
@@ -111,16 +117,8 @@ interface ChartLegendPanelProps {
   twoLevelPieTimepointData?: TimepointTwoLevelPieData[];  // 시점별 2단계 파이 데이터
 }
 
-// 값 포맷 함수
-function formatValue(value: number): string {
-  if (Math.abs(value) >= 1000000) {
-    return `${(value / 1000000).toFixed(1)}M`;
-  }
-  if (Math.abs(value) >= 1000) {
-    return `${(value / 1000).toFixed(1)}K`;
-  }
-  return value.toLocaleString();
-}
+// 로컬 포맷터는 공용 유틸로 대체. 축약 표시는 formatLegendValue, 원본은 formatFull.
+const formatValue = (value: number) => formatLegendValue(value);
 
 export function ChartLegendPanel({
   seriesFields,
@@ -586,8 +584,11 @@ export function ChartLegendPanel({
                             <span className="text-xs text-muted-foreground flex-shrink-0">{actualRank}위</span>
                             <span className="text-xs text-foreground truncate">{item.name}</span>
                           </div>
-                          <span className="text-xs font-medium text-muted-foreground flex-shrink-0">
-                            {formatValue(item.value)}
+                          <span
+                            className="text-xs font-medium text-muted-foreground flex-shrink-0"
+                            title={formatFull(item.value)}
+                          >
+                            {formatLegendValue(item.value)}
                           </span>
                         </div>
                       );
@@ -683,8 +684,11 @@ export function ChartLegendPanel({
                             <span className="text-xs text-muted-foreground flex-shrink-0">{actualRank}위</span>
                             <span className="text-xs text-foreground truncate">{item.districtName}</span>
                           </div>
-                          <span className="text-xs font-medium text-muted-foreground flex-shrink-0">
-                            {formatValue(item.value)} ({percentage.toFixed(1)}%)
+                          <span
+                            className="text-xs font-medium text-muted-foreground flex-shrink-0"
+                            title={`${formatFull(item.value)} (${percentage.toFixed(1)}%)`}
+                          >
+                            {formatLegendValue(item.value)} ({percentage.toFixed(1)}%)
                           </span>
                         </div>
                       );
@@ -805,7 +809,7 @@ export function ChartLegendPanel({
               {regressionStats && (
                 <div className="flex items-center justify-between gap-2 text-xs pt-1.5 border-t border-border">
                   <span className="text-muted-foreground truncate min-w-0" title="R² (결정계수):">R² (결정계수):</span>
-                  <span className="font-medium text-foreground whitespace-nowrap flex-shrink-0">{regressionStats.r2.toFixed(3)}</span>
+                  <span className="font-medium text-foreground whitespace-nowrap flex-shrink-0">{formatStat(regressionStats.r2)}</span>
                 </div>
               )}
             </div>
@@ -852,8 +856,11 @@ export function ChartLegendPanel({
                                 />
                                 <span className="text-xs text-muted-foreground truncate">{item.name}</span>
                               </div>
-                              <div className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
-                                {item.value.toLocaleString()} ({item.percentage.toFixed(1)}%)
+                              <div
+                                className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0"
+                                title={`${formatFull(item.value)} (${item.percentage.toFixed(1)}%)`}
+                              >
+                                {formatLegendValue(item.value)} ({item.percentage.toFixed(1)}%)
                               </div>
                             </div>
                           );
@@ -880,8 +887,11 @@ export function ChartLegendPanel({
                           />
                           <span className="text-xs font-medium truncate">{group.name}</span>
                         </div>
-                        <div className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
-                          {group.value.toLocaleString()} ({group.percentage.toFixed(1)}%)
+                        <div
+                          className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0"
+                          title={`${formatFull(group.value)} (${group.percentage.toFixed(1)}%)`}
+                        >
+                          {formatLegendValue(group.value)} ({group.percentage.toFixed(1)}%)
                         </div>
                       </div>
                       {/* 하위 시리즈 */}
@@ -912,8 +922,11 @@ export function ChartLegendPanel({
                                     />
                                     <span className="text-xs text-muted-foreground truncate">{getSeriesLabel(child.name)}</span>
                                   </div>
-                                  <div className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
-                                    {child.value.toLocaleString()} ({child.percentage.toFixed(1)}%)
+                                  <div
+                                    className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0"
+                                    title={`${formatFull(child.value)} (${child.percentage.toFixed(1)}%)`}
+                                  >
+                                    {formatLegendValue(child.value)} ({child.percentage.toFixed(1)}%)
                                   </div>
                                 </div>
                               );
@@ -978,8 +991,11 @@ export function ChartLegendPanel({
                             />
                             <span className="text-sm font-medium truncate" title={getSeriesLabel(group.name)}>{getSeriesLabel(group.name)}</span>
                           </div>
-                          <div className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
-                            {groupTotal.toLocaleString()} ({groupPercentage.toFixed(1)}%)
+                          <div
+                            className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0"
+                            title={`${formatFull(groupTotal)} (${groupPercentage.toFixed(1)}%)`}
+                          >
+                            {formatLegendValue(groupTotal)} ({groupPercentage.toFixed(1)}%)
                           </div>
                         </div>
                         {/* 하위 시리즈 */}
@@ -1016,8 +1032,11 @@ export function ChartLegendPanel({
                                   />
                                   <span className="text-xs text-muted-foreground truncate">{getSeriesLabel(seriesName)}</span>
                                 </div>
-                                <div className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
-                                  {seriesValue.toLocaleString()} ({seriesPercentage.toFixed(1)}%)
+                                <div
+                                  className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0"
+                                  title={`${formatFull(seriesValue)} (${seriesPercentage.toFixed(1)}%)`}
+                                >
+                                  {formatLegendValue(seriesValue)} ({seriesPercentage.toFixed(1)}%)
                                 </div>
                               </div>
                             );

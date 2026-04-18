@@ -13,6 +13,7 @@ import {
   Customized,
 } from "recharts";
 import type { ChartThemeColors } from "./recharts-wrapper";
+import { axisTickFormatter } from "@/packages/chart-lib/utils/number-formatters";
 import { getAxisLineColor } from "./recharts-wrapper";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@chartCore/src/components/ui/select";
 import type { TimepointRegressionScatterData } from "@chartCore/src/tools/chartTool/utils/recharts-adapter";
@@ -239,19 +240,7 @@ export function RechartsRegressionScatterWrapper({
     onOutlierCount?.(outlierCount);
   }, [outlierCount, onOutlierCount]);
 
-  const formatTick = (value: number) => {
-    const rounded = Math.round(value);
-    if (Math.abs(rounded) >= 1000000000) {
-      return `${Math.round(rounded / 1000000000)}B`;
-    }
-    if (Math.abs(rounded) >= 1000000) {
-      return `${Math.round(rounded / 1000000)}M`;
-    }
-    if (Math.abs(rounded) >= 1000) {
-      return `${Math.round(rounded / 1000)}K`;
-    }
-    return rounded.toLocaleString();
-  };
+  const formatTick = (value: number) => axisTickFormatter(value);
 
   // R² 라벨 위치 (우측 상단 고정)
   const r2LabelPosition = { xPercent: 0.995, yPercent: 0.82, anchor: 'end' as const };

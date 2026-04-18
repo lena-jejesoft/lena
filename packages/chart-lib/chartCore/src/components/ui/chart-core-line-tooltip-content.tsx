@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { formatTooltipValue as formatNumericTooltip } from "@/packages/chart-lib/utils/number-formatters";
 
 type TooltipItem = {
   color?: string;
@@ -24,7 +25,7 @@ function formatTooltipValue(value: TooltipValue | null): string {
     return value.map((item) => formatTooltipValue(item)).join(", ");
   }
   if (typeof value === "number") {
-    return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    return formatNumericTooltip(value);
   }
   if (value == null) {
     return "-";

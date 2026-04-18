@@ -3,6 +3,7 @@
 import type { CSSProperties } from "react";
 import { cn } from "@chartCore/src/lib/utils";
 import type { ChartType, LegendValueState, YAxisPlacement, HierarchyGroup } from "@chartCore/src/types/chart-config";
+import { formatFull, formatLegendValue, formatPercent } from "@/packages/chart-lib/utils/number-formatters";
 
 interface LegendItemProps {
   name: string;
@@ -125,27 +126,33 @@ export function LegendItem({
 
   const seriesType = getSeriesType();
 
-  // 값 포맷팅
-  const formatDisplayValue = () => {
-    if (valueState === 'missing') return '-';
-    if (value === null) return '';
+  // 값 포맷팅 — 축약(compact)과 원본(full)을 함께 계산해 title 로 원본 노출
+  const formatDisplayValue = (): { compact: string; full: string } => {
+    if (valueState === 'missing') return { compact: '-', full: '-' };
+    if (value === null) return { compact: '', full: '' };
 
     // 100% 누적막대/영역: 원본값 (퍼센트%) 형식
     if ((chartType === "stacked-100" || chartType === "area-100") && originalValue !== null && originalValue !== undefined) {
-      const percentValue = value.toFixed(1);
-      return `${originalValue.toLocaleString()} (${percentValue}%)`;
+      const pct = formatPercent(value, { scale: "percent" });
+      return {
+        compact: `${formatLegendValue(originalValue)} (${pct})`,
+        full: `${formatFull(originalValue)} (${pct})`,
+      };
     }
 
     // 파이 차트, 트리맵: 값 (비율%) 형식
     if ((chartType === "pie" || chartType === "two-level-pie" || chartType === "treemap") && totalPieValue && totalPieValue > 0) {
-      const percentage = ((value / totalPieValue) * 100).toFixed(1);
-      return `${value.toLocaleString()} (${percentage}%)`;
+      const pct = formatPercent(value / totalPieValue);
+      return {
+        compact: `${formatLegendValue(value)} (${pct})`,
+        full: `${formatFull(value)} (${pct})`,
+      };
     }
 
-    return value.toLocaleString();
+    return { compact: formatLegendValue(value), full: formatFull(value) };
   };
 
-  const displayValue = formatDisplayValue();
+  const { compact: displayValue, full: displayValueFull } = formatDisplayValue();
 
   // 값 색상 (inline style로 강제 적용)
   const getValueStyle = () => {
@@ -503,7 +510,7 @@ export function LegendItem({
           </span>
         </div>
 
-        {/* 값 (우측 정렬) */}
+        {/* 값 (우측 정렬) — 축약 + title 에 원본 */}
         {displayValue && (
           <span
             className={cn(
@@ -512,6 +519,7 @@ export function LegendItem({
               getValueColor()
             )}
             style={getValueStyle()}
+            title={displayValueFull !== displayValue ? displayValueFull : undefined}
           >
             {displayValue}
           </span>

@@ -18,6 +18,7 @@ import {
 } from "recharts";
 import type { ChartType, YAxisPlacement } from "@chartCore/src/types/chart-config";
 import { formatDateForXAxis } from "@chartCore/src/tools/chartTool/utils/recharts-adapter";
+import { axisTickFormatter } from "@/packages/chart-lib/utils/number-formatters";
 import { getZeroLineStyle } from "./recharts-utils";
 import { CustomYAxisLine } from "./custom-y-axis-line";
 import { ChartCoreLineTooltipContent } from "./chart-core-line-tooltip-content";
@@ -1268,20 +1269,7 @@ export function RechartsWrapper({
                       tickLine={false}
                       axisLine={{ stroke: getAxisLineColor(), strokeWidth: 1.5 }}
                       label={createYAxisLabel(defaultYAxisLabel)}
-                      tickFormatter={(value) => {
-                        if (typeof value === "number") {
-                          if (Math.abs(value) >= 1000000000) {
-                            return `${(value / 1000000000).toFixed(1)}B`;
-                          }
-                          if (Math.abs(value) >= 1000000) {
-                            return `${(value / 1000000).toFixed(1)}M`;
-                          }
-                          if (Math.abs(value) >= 1000) {
-                            return `${(value / 1000).toFixed(1)}K`;
-                          }
-                        }
-                        return value;
-                      }}
+                      tickFormatter={(value) => typeof value === "number" ? axisTickFormatter(value) : value}
                     />
                     <Tooltip cursor={false} content={() => null} />
                     <Legend wrapperStyle={{ display: "none" }} />
@@ -1345,20 +1333,7 @@ export function RechartsWrapper({
                       tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
                       tickLine={false}
                       axisLine={{ stroke: getAxisLineColor(), strokeWidth: 1.5 }}
-                      tickFormatter={(value) => {
-                        if (typeof value === "number") {
-                          if (Math.abs(value) >= 1000000000) {
-                            return `${(value / 1000000000).toFixed(1)}B`;
-                          }
-                          if (Math.abs(value) >= 1000000) {
-                            return `${(value / 1000000).toFixed(1)}M`;
-                          }
-                          if (Math.abs(value) >= 1000) {
-                            return `${(value / 1000).toFixed(1)}K`;
-                          }
-                        }
-                        return value;
-                      }}
+                      tickFormatter={(value) => typeof value === "number" ? axisTickFormatter(value) : value}
                     />
                     <ReferenceLine
                       y={0}
@@ -1472,31 +1447,7 @@ export function RechartsWrapper({
                 tickLine={false}
                 axisLine={isDualAxisLike ? { stroke: getAxisLineColor(), strokeWidth: 1.5 } : false}
                 label={isDualAxisLike ? createYAxisLabel(leftYAxisLabel, "left") : undefined}
-                tickFormatter={(value) => {
-                  if (typeof value === "number") {
-                    if (Math.abs(value) >= 1000000000) {
-                      const v = value / 1000000000;
-                      const rounded = Math.round(v);
-                      return Math.abs(v - rounded) < 0.001 ? `${rounded}B` : `${v.toFixed(1)}B`;
-                    }
-                    if (Math.abs(value) >= 1000000) {
-                      const v = value / 1000000;
-                      const rounded = Math.round(v);
-                      return Math.abs(v - rounded) < 0.001 ? `${rounded}M` : `${v.toFixed(1)}M`;
-                    }
-                    if (Math.abs(value) >= 1000) {
-                      const v = value / 1000;
-                      const rounded = Math.round(v);
-                      return Math.abs(v - rounded) < 0.001 ? `${rounded}K` : `${v.toFixed(1)}K`;
-                    }
-                    // 1000 미만: 정수면 정수로, 소수면 소수점 2자리까지
-                    if (!Number.isInteger(value)) {
-                      return parseFloat(value.toFixed(2)).toString();
-                    }
-                    return String(value);
-                  }
-                  return value;
-                }}
+                tickFormatter={(value) => typeof value === "number" ? axisTickFormatter(value) : value}
               />
 
               {/* 우측 Y축 - 이중축일 때만 표시 */}
@@ -1510,31 +1461,7 @@ export function RechartsWrapper({
                 tickLine={false}
                 axisLine={isDualAxisLike ? { stroke: getAxisLineColor(), strokeWidth: 1.5 } : false}
                 label={isDualAxisLike ? createYAxisLabel(rightYAxisLabel, "right") : undefined}
-                tickFormatter={(value) => {
-                  if (typeof value === "number") {
-                    if (Math.abs(value) >= 1000000000) {
-                      const v = value / 1000000000;
-                      const rounded = Math.round(v);
-                      return Math.abs(v - rounded) < 0.001 ? `${rounded}B` : `${v.toFixed(1)}B`;
-                    }
-                    if (Math.abs(value) >= 1000000) {
-                      const v = value / 1000000;
-                      const rounded = Math.round(v);
-                      return Math.abs(v - rounded) < 0.001 ? `${rounded}M` : `${v.toFixed(1)}M`;
-                    }
-                    if (Math.abs(value) >= 1000) {
-                      const v = value / 1000;
-                      const rounded = Math.round(v);
-                      return Math.abs(v - rounded) < 0.001 ? `${rounded}K` : `${v.toFixed(1)}K`;
-                    }
-                    // 1000 미만: 정수면 정수로, 소수면 소수점 2자리까지
-                    if (!Number.isInteger(value)) {
-                      return parseFloat(value.toFixed(2)).toString();
-                    }
-                    return String(value);
-                  }
-                  return value;
-                }}
+                tickFormatter={(value) => typeof value === "number" ? axisTickFormatter(value) : value}
               />
 
               {/* 기본 Y축 - 이중축일 때는 숨김 */}
@@ -1552,33 +1479,11 @@ export function RechartsWrapper({
                 axisLine={isDualAxisLike ? false : { stroke: getAxisLineColor(), strokeWidth: 1.5 }}
                 label={isDualAxisLike ? undefined : createYAxisLabel(defaultYAxisLabel)}
                 tickFormatter={(value) => {
-                  if (typeof value === "number") {
-                    // 100% 누적막대 또는 100% 영역: 퍼센트 표시
-                    if (chartType === "stacked-100" || chartType === "area-100") {
-                      return `${value.toFixed(0)}%`;
-                    }
-                    if (Math.abs(value) >= 1000000000) {
-                      const v = value / 1000000000;
-                      const rounded = Math.round(v);
-                      return Math.abs(v - rounded) < 0.001 ? `${rounded}B` : `${v.toFixed(1)}B`;
-                    }
-                    if (Math.abs(value) >= 1000000) {
-                      const v = value / 1000000;
-                      const rounded = Math.round(v);
-                      return Math.abs(v - rounded) < 0.001 ? `${rounded}M` : `${v.toFixed(1)}M`;
-                    }
-                    if (Math.abs(value) >= 1000) {
-                      const v = value / 1000;
-                      const rounded = Math.round(v);
-                      return Math.abs(v - rounded) < 0.001 ? `${rounded}K` : `${v.toFixed(1)}K`;
-                    }
-                    // 1000 미만: 소수점 2자리로 제한 (불필요한 0 제거)
-                    if (!Number.isInteger(value)) {
-                      return parseFloat(value.toFixed(2)).toString();
-                    }
-                    return String(value);
+                  if (typeof value !== "number") return value;
+                  if (chartType === "stacked-100" || chartType === "area-100") {
+                    return `${value.toFixed(0)}%`;
                   }
-                  return value;
+                  return axisTickFormatter(value);
                 }}
               />
               {(() => {

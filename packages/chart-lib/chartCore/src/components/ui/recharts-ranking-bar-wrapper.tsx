@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState, useEffect } from "react";
+import { axisTickFormatter } from "@/packages/chart-lib/utils/number-formatters";
 import {
   ResponsiveContainer,
   BarChart,
@@ -43,18 +44,8 @@ function getAxisLineColor(): string {
   return isDark ? "#ffffff" : "hsl(0 0% 44%)";
 }
 
-function formatValue(value: number): string {
-  if (Math.abs(value) >= 1000000000) {
-    return `${(value / 1000000000).toFixed(1)}B`;
-  }
-  if (Math.abs(value) >= 1000000) {
-    return `${(value / 1000000).toFixed(1)}M`;
-  }
-  if (Math.abs(value) >= 1000) {
-    return `${(value / 1000).toFixed(1)}K`;
-  }
-  return value.toString();
-}
+// 축/툴팁 모두 공용 axisTickFormatter 로 통일 (ko 로케일, 조/억/만)
+const formatValue = (value: number): string => axisTickFormatter(value);
 
 // Y축 레이블 truncate (최대 12자)
 function truncateLabel(text: string, maxLength: number = 12): string {

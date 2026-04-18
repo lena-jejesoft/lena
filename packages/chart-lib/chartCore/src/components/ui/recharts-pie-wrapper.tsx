@@ -5,6 +5,11 @@ import { PieChart, Pie, Cell, Tooltip, Sector, ResponsiveContainer } from "recha
 import type { ChartThemeColors } from "./recharts-wrapper";
 import { expandSeriesColors } from "./recharts-wrapper";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
+import {
+  formatFull,
+  formatPercent,
+  formatPieCalloutValue,
+} from "@/packages/chart-lib/utils/number-formatters";
 
 export interface PieChartDataItem {
   name: string;
@@ -101,14 +106,15 @@ const renderActiveShape = (props: any, labelMap?: Record<string, string>) => {
       <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={fill} fill="none" />
       {/* 연결점 */}
       <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
-      {/* 값 텍스트 */}
+      {/* 값 텍스트 — SVG <title> 로 원본 노출 */}
       <text
         x={ex + (cos >= 0 ? 1 : -1) * 12}
         y={ey}
         textAnchor={textAnchor}
         style={{ fill: "hsl(var(--foreground))", fontSize: 12 }}
       >
-        {(value ?? 0).toLocaleString()}
+        <title>{formatFull(value ?? 0)}</title>
+        {formatPieCalloutValue(value ?? 0)}
       </text>
       {/* 비율 텍스트 */}
       <text
@@ -118,7 +124,7 @@ const renderActiveShape = (props: any, labelMap?: Record<string, string>) => {
         textAnchor={textAnchor}
         style={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
       >
-        {`(Rate ${((percent ?? 0) * 100).toFixed(2)}%)`}
+        {`(Rate ${formatPercent(percent ?? 0, { decimals: 1 })})`}
       </text>
     </g>
   );
@@ -189,14 +195,15 @@ const renderCompactActiveShape = (props: any, labelMap?: Record<string, string>)
       <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={fill} fill="none" />
       {/* 연결점 */}
       <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
-      {/* 값 텍스트 */}
+      {/* 값 텍스트 — SVG <title> 로 원본 노출 */}
       <text
         x={ex + (cos >= 0 ? 1 : -1) * 4}
         y={ey}
         textAnchor={textAnchor}
         style={{ fill: "hsl(var(--foreground))", fontSize: 10 }}
       >
-        {(value ?? 0).toLocaleString()}
+        <title>{formatFull(value ?? 0)}</title>
+        {formatPieCalloutValue(value ?? 0)}
       </text>
       {/* 비율 텍스트 */}
       <text
@@ -206,7 +213,7 @@ const renderCompactActiveShape = (props: any, labelMap?: Record<string, string>)
         textAnchor={textAnchor}
         style={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }}
       >
-        {`(${((percent ?? 0) * 100).toFixed(1)}%)`}
+        {`(${formatPercent(percent ?? 0, { decimals: 1 })})`}
       </text>
     </g>
   );
@@ -259,7 +266,7 @@ const renderDefaultLabel = (
         dominantBaseline="central"
         style={{ fill: "hsl(var(--foreground))", fontSize: 11 }}
       >
-        {`${displayName} (${(percent * 100).toFixed(1)}%)`}
+        {`${displayName} (${formatPercent(percent, { decimals: 1 })})`}
       </text>
     </g>
   );

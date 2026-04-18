@@ -6,6 +6,11 @@ import type { ChartThemeColors } from "./recharts-wrapper";
 import { expandSeriesColors } from "./recharts-wrapper";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
 import { chartColors, hexToHsl } from "@/lib/colors";
+import {
+  formatFull,
+  formatPercent,
+  formatPieCalloutValue,
+} from "@/packages/chart-lib/utils/number-formatters";
 
 // 2단계 원형 차트 전용 색상 팔레트 (Anthropic 브랜드 스타일)
 export const TWO_LEVEL_PIE_COLORS = chartColors
@@ -151,7 +156,7 @@ const renderTwoLevelDefaultLabel = (
           dominantBaseline="central"
           style={{ fill: "hsl(var(--foreground))", fontSize: 11 }}
         >
-          {`${resolveDisplayName(groupName, labelMap)} (${(groupPercent * 100).toFixed(1)}%)`}
+          {`${resolveDisplayName(groupName, labelMap)} (${formatPercent(groupPercent, { decimals: 1 })})`}
         </text>
       </g>
     );
@@ -196,7 +201,7 @@ const renderTwoLevelDefaultLabel = (
         dominantBaseline="central"
         style={{ fill: "hsl(var(--foreground))", fontSize: 11 }}
       >
-        {`${resolveDisplayName(name, labelMap)} (${(percent * 100).toFixed(1)}%)`}
+        {`${resolveDisplayName(name, labelMap)} (${formatPercent(percent, { decimals: 1 })})`}
       </text>
     </g>
   );
@@ -271,14 +276,15 @@ const renderTwoLevelActiveShape = (
       <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={fill} fill="none" />
       {/* 연결점 */}
       <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
-      {/* 값 텍스트 */}
+      {/* 값 텍스트 — SVG <title> 로 원본 노출 */}
       <text
         x={ex + (cos >= 0 ? 1 : -1) * 8}
         y={ey}
         textAnchor={textAnchor}
         style={{ fill: "hsl(var(--foreground))", fontSize: 11 }}
       >
-        {truncatedName}: {displayValue.toLocaleString()}
+        <title>{`${truncatedName}: ${formatFull(displayValue)}`}</title>
+        {truncatedName}: {formatPieCalloutValue(displayValue)}
       </text>
       {/* 비율 텍스트 */}
       <text
@@ -288,7 +294,7 @@ const renderTwoLevelActiveShape = (
         textAnchor={textAnchor}
         style={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
       >
-        {`(${((percent ?? 0) * 100).toFixed(1)}%)`}
+        {`(${formatPercent(percent ?? 0, { decimals: 1 })})`}
       </text>
     </g>
   );
