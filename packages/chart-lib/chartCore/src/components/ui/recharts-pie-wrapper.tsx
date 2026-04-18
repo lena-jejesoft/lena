@@ -116,8 +116,7 @@ const renderActiveShape = (props: any, labelMap?: Record<string, string>) => {
         y={ey}
         dy={18}
         textAnchor={textAnchor}
-        className="fill-muted-foreground"
-        style={{ fontSize: 12 }}
+        style={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
       >
         {`(Rate ${((percent ?? 0) * 100).toFixed(2)}%)`}
       </text>
@@ -205,8 +204,7 @@ const renderCompactActiveShape = (props: any, labelMap?: Record<string, string>)
         y={ey}
         dy={11}
         textAnchor={textAnchor}
-        className="fill-muted-foreground"
-        style={{ fontSize: 9 }}
+        style={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }}
       >
         {`(${((percent ?? 0) * 100).toFixed(1)}%)`}
       </text>
