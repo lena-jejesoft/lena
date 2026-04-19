@@ -783,11 +783,14 @@ export default function ChartToolView({
     defaultSeriesColors,
   ]);
 
-  // Two-Level Pie 시리즈 마커/오버레이/차트 조각이 참조하는 안정된 per-series 색상 맵.
-  // seriesFields(= 원본 시리즈 id 목록) 순서 기반으로 산출하고 seriesColorOverrides 로 오버라이드.
-  // colorTargetFields(그룹명 치환) 경로와 분리해 그룹 할당과 무관하게 고정.
+  // Two-Level Pie / Multi-Level Treemap 의 시리즈 마커/오버레이/legend 가 참조하는 안정된
+  // per-series 색상 맵. seriesFields(= 원본 시리즈 id 목록) 순서 기반으로 산출하고
+  // seriesColorOverrides 로 오버라이드. colorTargetFields(그룹명 치환) 경로와 분리해
+  // 그룹 할당과 무관하게 고정. 차트 타입별 팔레트를 사용해 차트 본체 색과 맞춘다.
   const stableSeriesColorsById = useMemo(() => {
-    const palette = expandSeriesColors(TWO_LEVEL_PIE_COLORS, seriesFields.length);
+    const palette = chartType === "multi-level-treemap" || chartType === "treemap"
+      ? expandSeriesColors(multiLevelTreemapColors || MULTI_LEVEL_TREEMAP_COLORS, seriesFields.length)
+      : expandSeriesColors(TWO_LEVEL_PIE_COLORS, seriesFields.length);
     const map: Record<string, string> = {};
     seriesFields.forEach((id, idx) => {
       const override = seriesColorOverrides?.[id];
@@ -796,7 +799,7 @@ export default function ChartToolView({
         : (palette[idx] ?? palette[0] ?? "#C15F3C");
     });
     return map;
-  }, [seriesFields, seriesColorOverrides]);
+  }, [seriesFields, seriesColorOverrides, chartType, multiLevelTreemapColors]);
 
   // Two-Level Pie 의 그룹 헤더/Mode 1 외부 원이 참조하는 그룹 전용 팔레트 맵.
   // 시리즈 팔레트와 겹치지 않는 GROUP_HEADER_PALETTE 를 그룹 순서대로 할당. groupColorOverrides 로 오버라이드.
@@ -880,6 +883,9 @@ export default function ChartToolView({
               series: treemapStats.seriesData.map((item) => ({
                 id: item.name,
                 label: seriesLabelMap?.[item.name] ?? item.name,
+                // 시리즈 id 고정 팔레트 색을 legend/오버레이에 노출. 드릴다운 차트 셀의 gradient
+                // 와 정확히 맞지는 않지만, 최소한 legend 간 드리프트는 제거된다 (TLP 수정과 동일).
+                color: stableSeriesColorsById[item.name],
               })),
             },
           ],
@@ -893,6 +899,7 @@ export default function ChartToolView({
         series: (group.children || []).map((child) => ({
           id: child.name,
           label: seriesLabelMap?.[child.name] ?? child.name,
+          color: stableSeriesColorsById[child.name],
         })),
       }));
       if (!groups.length) return null;
