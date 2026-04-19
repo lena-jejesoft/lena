@@ -1,6 +1,6 @@
 # chart-lib
 
-65종 이상의 차트를 렌더링하는 React 컴포넌트 라이브러리.
+30종 내외의 차트를 렌더링하는 React 컴포넌트 라이브러리.
 `<DataChart>` 하나에 `data`와 `chartType`만 넘기면 동작한다.
 내부적으로 Recharts, Lightweight Charts 2개 렌더러(+ 내부 chartCore/core 구현)를 차트 유형에 따라 자동 라우팅한다.
 
@@ -75,6 +75,10 @@ npm install tailwindcss@^4.1 @tailwindcss/postcss@^4.1
 npm install tailwind-merge@^3.4 clsx@^2.1 class-variance-authority@^0.7 lucide-react@^0.563
 ```
 
+## 주의 — Client Component 필수
+
+`DataChart`는 내부에서 `next/dynamic`(`ssr: false`)으로 렌더러를 불러오므로 `"use client"` 지시어가 있는 컴포넌트에서만 사용할 수 있다. 서버 컴포넌트에서 직접 import하면 빌드가 실패한다.
+
 ## 기본 사용법
 
 가장 간단한 라인 차트 예제:
@@ -124,7 +128,9 @@ export default function MyChart() {
 | `isEmpty` | `boolean` | 빈 상태 표시 (기본 `false`) |
 | `emptyMessage` | `string` | 빈 상태 메시지 (기본 `"데이터가 없습니다"`) |
 
-> 실제 동작하는 예제는 `app/chart-demo` 참고 (추후 추가)
+추가 props(`sidebar`, `toolbar`, `onLegendStateChange`, `chartCoreSeriesColorOverrides` 등)는 `packages/chart-lib/types.ts`의 `DataChartProps` 참고.
+
+> 실제 동작하는 예제는 `app/chartlab` 참고
 
 ## 지원 차트 유형
 
@@ -147,9 +153,9 @@ UI에서 선택 가능한 활성 차트 유형 목록.
 | `chartCore/stacked-area` | Stacked Area |
 | `chartCore/synced-area` | Synced Area |
 | `chartCore/pie` | Pie |
-| `chartCore/two-level-pie` | Two-Level Pie |
+| `chartCore/two-level-pie` | Two-Level Pie **(WIP)** |
 | `chartCore/treemap` | Treemap |
-| `chartCore/multi-level-treemap` | Multi-Level Treemap |
+| `chartCore/multi-level-treemap` | Multi-Level Treemap **(WIP)** |
 | `chartCore/ranking-bar` | Ranking Bar |
 | `chartCore/geo-grid` | Geo Grid |
 | `chartCore/regression-scatter` | Regression Scatter |
@@ -172,6 +178,12 @@ UI에서 선택 가능한 활성 차트 유형 목록.
 | `core/grid` | Core / Grid | Core |
 | `core/insider-trading` | Core / Insider Trading | Core |
 
+각 차트의 데이터 형식은 [DATA_FORMAT.md](./DATA_FORMAT.md) 참고. **(WIP)** 표시된 차트는 현재 개선 작업이 진행 중이므로 동작이 일부 불안정할 수 있다.
+
 ## 더 자세한 정보
 
 차트 유형별 데이터 형식, Point 타입, Style 옵션은 [DATA_FORMAT.md](./DATA_FORMAT.md) 참고.
+
+## 피드백
+
+시험 사용 후 피드백은 [양식 링크 - 추후 공유]에 남겨주세요.
