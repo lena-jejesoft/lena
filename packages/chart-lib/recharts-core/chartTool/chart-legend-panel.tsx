@@ -99,6 +99,10 @@ interface ChartLegendPanelProps {
   allSeriesFieldsForHierarchy?: string[];  // 계층 그룹 설정용 원본 시리즈
   twoLevelPieOuterData?: Array<{ name: string; value: number; series: string }>;  // 외부 링 데이터
   twoLevelPieTimepointData?: TimepointTwoLevelPieData[];  // 시점별 2단계 파이 데이터
+  // Two-Level Pie 시리즈 마커 전용: series.id → 안정된 원본 색. 그룹 할당과 무관.
+  seriesColorsById?: Record<string, string>;
+  // Two-Level Pie 그룹 헤더 전용: groupName → 그룹 팔레트 색.
+  groupHeaderColorsByName?: Record<string, string>;
 }
 
 // 값 포맷 함수
@@ -165,6 +169,8 @@ export function ChartLegendPanel({
   allSeriesFieldsForHierarchy,
   twoLevelPieOuterData,
   twoLevelPieTimepointData,
+  seriesColorsById,
+  groupHeaderColorsByName,
 }: ChartLegendPanelProps) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);  // 이중축 편집 모드
@@ -815,7 +821,7 @@ export function ChartLegendPanel({
                         <div className="flex items-center gap-2 min-w-0">
                           <span
                             className="w-3 h-3 rounded-sm flex-shrink-0"
-                            style={{ backgroundColor: seriesColors[groupIdx % seriesColors.length] }}
+                            style={{ backgroundColor: groupHeaderColorsByName?.[group.name] ?? seriesColors[groupIdx % seriesColors.length] }}
                           />
                           <span className="text-sm font-medium truncate">{group.name}</span>
                         </div>
@@ -828,6 +834,9 @@ export function ChartLegendPanel({
                         {group.series.map((seriesName) => {
                           const seriesValue = getOuterSeriesValue(seriesName);
                           const seriesPercentage = outerTotal > 0 ? (seriesValue / outerTotal) * 100 : 0;
+                          // 시리즈 마커: id 기반 안정된 원본 색. 그룹 할당과 무관.
+                          const seriesColor = seriesColorsById?.[seriesName]
+                            ?? seriesColors[seriesFields.indexOf(seriesName) % seriesColors.length];
 
                           return (
                             <div
@@ -840,10 +849,7 @@ export function ChartLegendPanel({
                               <div className="flex items-center gap-2 min-w-0">
                                 <span
                                   className="w-2 h-2 rounded-sm flex-shrink-0"
-                                  style={{
-                                    backgroundColor: seriesColors[groupIdx % seriesColors.length],
-                                    opacity: 0.7
-                                  }}
+                                  style={{ backgroundColor: seriesColor }}
                                 />
                                 <span className="text-xs text-muted-foreground truncate">{getSeriesLabel(seriesName)}</span>
                               </div>

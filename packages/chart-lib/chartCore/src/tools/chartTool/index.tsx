@@ -111,6 +111,7 @@ import { DataQualityCard } from "./components/data-quality-card";
 import { ChartLegendPanel } from "./components/chart-legend-panel";
 import { HierarchyGroupPanel } from "./components/hierarchy-group-panel";
 import { axisTickFormatter } from "@/packages/chart-lib/utils/number-formatters";
+import { GROUP_HEADER_PALETTE } from "@/packages/chart-lib/utils/two-level-pie-colors";
 
 const LEGEND_COLLAPSE_THRESHOLD = 10; // 10개 초과 시 페이지네이션 활성화
 
@@ -782,6 +783,34 @@ export default function ChartToolView({
     defaultSeriesColors,
   ]);
 
+  // Two-Level Pie 시리즈 마커/오버레이/차트 조각이 참조하는 안정된 per-series 색상 맵.
+  // seriesFields(= 원본 시리즈 id 목록) 순서 기반으로 산출하고 seriesColorOverrides 로 오버라이드.
+  // colorTargetFields(그룹명 치환) 경로와 분리해 그룹 할당과 무관하게 고정.
+  const stableSeriesColorsById = useMemo(() => {
+    const palette = expandSeriesColors(TWO_LEVEL_PIE_COLORS, seriesFields.length);
+    const map: Record<string, string> = {};
+    seriesFields.forEach((id, idx) => {
+      const override = seriesColorOverrides?.[id];
+      map[id] = isValidHexColor(override)
+        ? override!
+        : (palette[idx] ?? palette[0] ?? "#C15F3C");
+    });
+    return map;
+  }, [seriesFields, seriesColorOverrides]);
+
+  // Two-Level Pie 의 그룹 헤더/Mode 1 외부 원이 참조하는 그룹 전용 팔레트 맵.
+  // 시리즈 팔레트와 겹치지 않는 GROUP_HEADER_PALETTE 를 그룹 순서대로 할당. groupColorOverrides 로 오버라이드.
+  const groupHeaderColorsByName = useMemo(() => {
+    const map: Record<string, string> = {};
+    hierarchyGroups.forEach((group, idx) => {
+      const override = groupColorOverrides?.[group.name];
+      map[group.name] = isValidHexColor(override)
+        ? override!
+        : GROUP_HEADER_PALETTE[idx % GROUP_HEADER_PALETTE.length];
+    });
+    return map;
+  }, [hierarchyGroups, groupColorOverrides]);
+
   const chartCoreLegendMeta = useMemo<ChartCoreLegendMetaPayload | null>(() => {
     if (chartType === "two-level-pie") {
       const outerData = twoLevelPieRenderData.outerData;
@@ -809,17 +838,21 @@ export default function ChartToolView({
             outerData
               .filter((outerItem) => outerItem.name === groupName)
               .map((outerItem) => outerItem.series)
-              .filter((seriesName) => Boolean(seriesName))
-          )
+              .filter((seriesName): seriesName is string => Boolean(seriesName)),
+          ),
         );
         if (!childSeries.length) return;
+
+        const groupColor = groupHeaderColorsByName[groupName]
+          ?? GROUP_HEADER_PALETTE[index % GROUP_HEADER_PALETTE.length];
         groups.push({
           id: groupName,
           label: seriesLabelMap?.[groupName] ?? groupName,
-          color: resolveGroupLegendColor(groupName, index),
+          color: groupColor,
           series: childSeries.map((seriesName) => ({
             id: seriesName,
             label: seriesLabelMap?.[seriesName] ?? seriesName,
+            color: stableSeriesColorsById[seriesName],
           })),
         });
       });
@@ -878,6 +911,8 @@ export default function ChartToolView({
     groupColorOverrides,
     resolveGroupLegendColor,
     seriesLabelMap,
+    stableSeriesColorsById,
+    groupHeaderColorsByName,
   ]);
 
   const legendMetaSignatureRef = useRef<string>("");
@@ -1180,6 +1215,8 @@ export default function ChartToolView({
       allSeriesFieldsForHierarchy={seriesFields}
       twoLevelPieOuterData={chartType === "two-level-pie" ? twoLevelPieData.outerData : undefined}
       twoLevelPieTimepointData={chartType === "two-level-pie" ? twoLevelPieTimepointData : undefined}
+      seriesColorsById={stableSeriesColorsById}
+      groupHeaderColorsByName={groupHeaderColorsByName}
     />
   ) : null;
 
@@ -1253,6 +1290,8 @@ export default function ChartToolView({
                     height={400}
                     allSeriesFields={twoLevelPieSeriesFields}
                     seriesLabelMap={seriesLabelMap}
+                    seriesColorsById={stableSeriesColorsById}
+                    groupHeaderColorsByName={groupHeaderColorsByName}
                     onTooltipChange={(payload, label) => {
                       setTooltipPayload(payload);
                       setHoveredLabel(label);

@@ -22,7 +22,7 @@ export const CHART_TYPE_OPTIONS: ChartTypeOption[] = [
   { value: "chartCore/stacked-area", label: "Stacked Area", iconKey: "stacked-area" },
   { value: "chartCore/synced-area", label: "Synced Area", iconKey: "stacked-area" },
   { value: "chartCore/pie", label: "Pie", iconKey: "pie" },
-  { value: "chartCore/two-level-pie", label: "Two-Level Pie", iconKey: "two-level-pie", wip: true },
+  { value: "chartCore/two-level-pie", label: "Two-Level Pie", iconKey: "two-level-pie" },
   { value: "chartCore/treemap", label: "Treemap", iconKey: "treemap" },
   { value: "chartCore/multi-level-treemap", label: "Multi-Level Treemap", iconKey: "treemap", wip: true },
   { value: "chartCore/ranking-bar", label: "Ranking Bar", iconKey: "bar" },

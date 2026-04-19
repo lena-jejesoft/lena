@@ -5,7 +5,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Sector } from "recharts";
 import type { ChartThemeColors } from "./recharts-wrapper";
 import { expandSeriesColors } from "./recharts-wrapper";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
-import { chartColors, hexToHsl } from "@/lib/colors";
+import { chartColors } from "@/lib/colors";
 import {
   formatFull,
   formatPercent,
@@ -14,6 +14,10 @@ import {
 
 // 2단계 원형 차트 전용 색상 팔레트 (Anthropic 브랜드 스타일)
 export const TWO_LEVEL_PIE_COLORS = chartColors
+
+// Mode 1 라벨 표시 가드: 그룹 내 최대 슬라이스 각도가 이 값 미만이면 그룹 전체 라벨 숨김.
+// 같은 그룹 내에서 "일부 표시 / 일부 숨김" 불일치를 막기 위한 all-or-none 규칙.
+const LABEL_MIN_ANGLE_DEGREES = 3;
 
 export interface TwoLevelPieInnerDataItem {
   name: string;
@@ -43,6 +47,10 @@ export interface RechartsTwoLevelPieWrapperProps {
   allSeriesFields: string[];
   onTooltipChange?: (payload: any[] | null, label: string | null) => void;
   seriesLabelMap?: Record<string, string>;  // field(id) → 표시용 레이블 매핑 (없으면 원본 사용)
+  // 시리즈 id → 안정된 원본 색 (그룹 할당과 무관). Mode 2/3 외부 슬라이스 및 Mode 2/3 inner 에서 사용.
+  seriesColorsById?: Record<string, string>;
+  // 그룹명 → 그룹 전용 팔레트 색. Mode 1 외부 슬라이스 및 내부 원(그룹 집계 모드)에서 사용.
+  groupHeaderColorsByName?: Record<string, string>;
 }
 
 /** 표시용 레이블 해석: map이 있으면 매핑, 없으면 name 그대로 */
@@ -85,115 +93,37 @@ function applyAlpha(color: string, alpha: number): string {
   return color;
 }
 
-/**
- * 색상의 밝기를 조정하여 변형 색상 생성 (헥스, HSL 모두 지원)
- */
-function adjustLightness(color: string, adjustment: number): string {
-  if (!color) return "hsl(0 0% 50%)"; // fallback 색상
-
-  // 헥스 색상 처리
-  if (color.startsWith('#')) {
-    const { h, s, l } = hexToHsl(color);
-    const newL = Math.max(20, Math.min(90, l + adjustment));
-    return `hsl(${Math.round(h)} ${Math.round(s)}% ${Math.round(newL)}%)`;
-  }
-
-  // HSL 색상 처리
-  const match = color.match(/hsl\((\d+)\s+([\d.]+)%\s+([\d.]+)%\)/);
-  if (!match) return color;
-
-  const h = match[1];
-  const s = match[2];
-  let l = parseFloat(match[3]);
-
-  l = Math.max(20, Math.min(90, l + adjustment));
-
-  return `hsl(${h} ${s}% ${l}%)`;
-}
-
-/** 기본 라벨 렌더러 (연결선 포함, 호버 시 숨김) */
-const renderTwoLevelDefaultLabel = (
-  props: any,
-  threshold: number,
-  isAnyHovered: boolean,
-  totalSum: number,
-  groupName?: string,
-  groupSum?: number,
-  labelMap?: Record<string, string>
-) => {
-  const { cx, cy, midAngle, outerRadius, value, name, fill, index } = props;
-
-  // 그룹 모드: 첫 번째 항목에만 그룹 레이블 표시
-  if (groupName !== undefined && groupSum !== undefined) {
-    if (index !== 0) return null;
-    const groupPercent = totalSum > 0 ? groupSum / totalSum : 0;
-    if (groupPercent < threshold) return null;
-    if (isAnyHovered) return null;
-
-    const RADIAN = Math.PI / 180;
-    const sin = Math.sin(-RADIAN * (midAngle ?? 0));
-    const cos = Math.cos(-RADIAN * (midAngle ?? 0));
-    const sx = (cx ?? 0) + ((outerRadius ?? 0) + 2) * cos;
-    const sy = (cy ?? 0) + ((outerRadius ?? 0) + 2) * sin;
-    const mx = (cx ?? 0) + ((outerRadius ?? 0) + 18) * cos;
-    const my = (cy ?? 0) + ((outerRadius ?? 0) + 18) * sin;
-    const ex = mx + (cos >= 0 ? 1 : -1) * 10;
-    const ey = my;
-    const textAnchor = cos >= 0 ? "start" : "end";
-
-    return (
-      <g>
-        <path
-          d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`}
-          stroke={fill || "hsl(var(--muted-foreground))"}
-          fill="none"
-          strokeWidth={1}
-        />
-        <text
-          x={ex + (cos >= 0 ? 1 : -1) * 4}
-          y={ey}
-          textAnchor={textAnchor}
-          dominantBaseline="central"
-          style={{ fill: "hsl(var(--foreground))", fontSize: 11 }}
-        >
-          {`${resolveDisplayName(groupName, labelMap)} (${formatPercent(groupPercent, { decimals: 1 })})`}
-        </text>
-      </g>
-    );
-  }
-
-  // 기존 모드 (그룹 없음)
-  const percent = totalSum > 0 ? value / totalSum : 0;
-
-  // 비율 미달이거나 호버 중이면 라벨 숨김
-  if (percent < threshold) return null;
-  if (isAnyHovered) return null;
-
+/** 외부 링 라벨 연결선/텍스트 기하. 공통 렌더 유틸. */
+const renderOuterLabelText = (props: any, labelText: string, startFromInner = false) => {
+  const { cx, cy, midAngle, innerRadius, outerRadius } = props;
   const RADIAN = Math.PI / 180;
   const sin = Math.sin(-RADIAN * (midAngle ?? 0));
   const cos = Math.cos(-RADIAN * (midAngle ?? 0));
-
-  // 연결선 시작점 (파이 바깥)
-  const sx = (cx ?? 0) + ((outerRadius ?? 0) + 2) * cos;
-  const sy = (cy ?? 0) + ((outerRadius ?? 0) + 2) * sin;
-  // 연결선 중간점
+  // 리더 라인 시작점:
+  //   startFromInner=true (Mode 1): 내부 원 바깥 경계(= 50% radius) 에서 시작. 선이 외부
+  //     원을 관통하지만 stroke 가 중립색이라 외부 원 색과 섞이지 않고 뚜렷이 보인다.
+  //     props 의 innerRadius 는 외부 원의 안쪽 경계(= 60% radius) 이므로 내부 원의
+  //     바깥 경계(50%) 로 환산하기 위해 5/6 배율 적용 (layout 상 50/60 비).
+  //   startFromInner=false (Mode 2/3): 외부 원 바깥 경계.
+  const anchorRadius = startFromInner
+    ? (innerRadius ?? 0) * (5 / 6)
+    : (outerRadius ?? 0) + 2;
+  const sx = (cx ?? 0) + anchorRadius * cos;
+  const sy = (cy ?? 0) + anchorRadius * sin;
   const mx = (cx ?? 0) + ((outerRadius ?? 0) + 18) * cos;
   const my = (cy ?? 0) + ((outerRadius ?? 0) + 18) * sin;
-  // 연결선 끝점 (수평)
   const ex = mx + (cos >= 0 ? 1 : -1) * 10;
   const ey = my;
   const textAnchor = cos >= 0 ? "start" : "end";
 
   return (
     <g>
-      {/* 연결선 */}
       <path
         d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`}
-        stroke={fill || "hsl(var(--muted-foreground))"}
+        stroke="hsl(var(--muted-foreground))"
         fill="none"
         strokeWidth={1}
       />
-      {/* 라벨 텍스트 */}
       <text
         x={ex + (cos >= 0 ? 1 : -1) * 4}
         y={ey}
@@ -201,45 +131,117 @@ const renderTwoLevelDefaultLabel = (
         dominantBaseline="central"
         style={{ fill: "hsl(var(--foreground))", fontSize: 11 }}
       >
-        {`${resolveDisplayName(name, labelMap)} (${formatPercent(percent, { decimals: 1 })})`}
+        {labelText}
       </text>
     </g>
   );
 };
 
-/** 호버 시 활성 섹터 렌더러 */
+/**
+ * 기본 라벨 렌더러 (연결선 포함, 호버 시 숨김).
+ *
+ * - `perSliceMode=true` (Mode 1): 각 외부 조각이 자기 시리즈 라벨 + 개별 비중 표시.
+ *   그룹 단위 all-or-none — `shouldShowGroupLabels=true` 일 때만 그룹 전체의 모든
+ *   슬라이스가 라벨을 띄우고, false 면 전부 숨김. 개별 percent 임계값은 무시.
+ * - `perSliceMode=false` (Mode 2/3): 그룹(시리즈) 단위 첫 조각에만 그룹명 + 그룹 비중 표시.
+ *   개별 percent 임계값 (threshold) 적용, 기존 동작 유지.
+ */
+const renderTwoLevelDefaultLabel = (
+  props: any,
+  threshold: number,
+  isAnyHovered: boolean,
+  totalSum: number,
+  groupName?: string,
+  groupSum?: number,
+  labelMap?: Record<string, string>,
+  perSliceMode?: boolean,
+  shouldShowGroupLabels?: boolean,
+) => {
+  if (isAnyHovered) return null;
+
+  const { value, payload, index } = props;
+
+  if (perSliceMode) {
+    if (!shouldShowGroupLabels) return null; // 그룹 all-or-none 가드
+    const seriesId = payload?.series;
+    if (!seriesId) return null;
+    const percent = totalSum > 0 ? (value ?? 0) / totalSum : 0;
+    // percent 임계값은 스킵 — 그룹 가드 통과 시 전부 표시.
+    const text = `${resolveDisplayName(seriesId, labelMap)} (${formatPercent(percent, { decimals: 1 })})`;
+    // Mode 1: 리더 시작점을 내부 원 경계(= 외부 원 innerRadius) 로.
+    return renderOuterLabelText(props, text, true);
+  }
+
+  // 그룹 모드 (Mode 2/3): 첫 번째 조각에만 그룹 레이블.
+  if (groupName !== undefined && groupSum !== undefined) {
+    if (index !== 0) return null;
+    const groupPercent = totalSum > 0 ? groupSum / totalSum : 0;
+    if (groupPercent < threshold) return null;
+    const text = `${resolveDisplayName(groupName, labelMap)} (${formatPercent(groupPercent, { decimals: 1 })})`;
+    return renderOuterLabelText(props, text);
+  }
+
+  // 비그룹 fallback (호출 경로는 없지만 안전망).
+  const percent = totalSum > 0 ? (value ?? 0) / totalSum : 0;
+  if (percent < threshold) return null;
+  const text = `${resolveDisplayName(payload?.name, labelMap)} (${formatPercent(percent, { decimals: 1 })})`;
+  return renderOuterLabelText(props, text);
+};
+
+/**
+ * 호버 시 활성 섹터 렌더러.
+ *
+ * 기본적으로 Recharts 가 조각 하나 단위로 호출하지만, 이 차트는 그룹 단위로 하나의
+ * `<Pie>` 를 렌더하므로 (Mode 1 = 한 그룹, Mode 2/3 = 한 시리즈) activeShape 에
+ * 그룹 전체의 `groupStartAngle..groupEndAngle` 을 넘기면 같은 그룹의 인접 조각들이
+ * 하나의 섹터로 시각 병합된다. 내부 경계선이 사라져 그룹 단위 하이라이트가 된다.
+ *
+ * `groupStartAngle` / `groupEndAngle` 가 주어지지 않으면 per-slice fallback.
+ */
 const renderTwoLevelActiveShape = (
   props: any,
   totalSum: number,
   labelMap?: Record<string, string>,
   groupKeyField: "name" | "series" = "series",
   groupSums?: Map<string, number>,
+  groupStartAngle?: number,
+  groupEndAngle?: number,
 ) => {
   const RADIAN = Math.PI / 180;
   const {
     cx,
     cy,
-    midAngle,
     innerRadius,
     outerRadius,
-    startAngle,
-    endAngle,
     fill,
     payload,
     value,
   } = props;
 
-  // 그룹 식별자(outer.name 또는 outer.series)를 labelMap으로 변환해 그룹 단위 콜아웃 라벨로 표시.
-  const rawGroupKey = payload?.[groupKeyField] ?? payload?.name;
-  const displayName = resolveDisplayName(rawGroupKey, labelMap);
-  const truncatedName = displayName.length > 10 ? `${displayName.slice(0, 10)}...` : displayName;
+  // 그룹 범위가 주어지면 그걸 사용, 아니면 props 의 per-slice 범위 fallback.
+  const startAngle = groupStartAngle ?? props.startAngle;
+  const endAngle = groupEndAngle ?? props.endAngle;
+  const midAngle = (startAngle + endAngle) / 2;
 
-  // 콜아웃 값/비율: groupSums 가 있으면 그룹 합계 기준, 없으면 개별 섹터 값 기준.
-  const displayValue = (groupSums && rawGroupKey) ? (groupSums.get(rawGroupKey) ?? value ?? 0) : (value ?? 0);
+  // 콜아웃 헤더: "그룹명 / 슬라이스명" — 그룹 컨텍스트 + 호버된 개별 조각의 정체.
+  //   Mode 1 (groupKeyField="name"): 그룹 = payload.name, 슬라이스 = payload.series.
+  //   Mode 2/3 (groupKeyField="series"): 그룹 = payload.series, 슬라이스 = payload.name.
+  const groupRawKey = payload?.[groupKeyField];
+  const sliceRawKey = groupKeyField === "name" ? payload?.series : payload?.name;
+  const groupDisplay = resolveDisplayName(groupRawKey, labelMap);
+  const sliceDisplay = resolveDisplayName(sliceRawKey, labelMap);
+  const headerParts = [groupDisplay, sliceDisplay].filter(Boolean);
+  const headerFull = headerParts.join(" / ");
+  const headerTruncated = headerFull.length > 18 ? `${headerFull.slice(0, 18)}...` : headerFull;
+
+  // 값/비율: 호버된 개별 슬라이스 기준 (그룹 합계 아님).
+  const displayValue = value ?? 0;
   const percent = totalSum > 0 ? displayValue / totalSum : 0;
+  // groupSums 는 현재 UI 에선 쓰이지 않지만 시그니처 호환을 위해 파라미터 유지 (미사용 경고 방지).
+  void groupSums;
 
-  const sin = Math.sin(-RADIAN * (midAngle ?? 0));
-  const cos = Math.cos(-RADIAN * (midAngle ?? 0));
+  const sin = Math.sin(-RADIAN * midAngle);
+  const cos = Math.cos(-RADIAN * midAngle);
   const sx = (cx ?? 0) + ((outerRadius ?? 0) + 4) * cos;
   const sy = (cy ?? 0) + ((outerRadius ?? 0) + 4) * sin;
   const mx = (cx ?? 0) + ((outerRadius ?? 0) + 22) * cos;
@@ -250,7 +252,9 @@ const renderTwoLevelActiveShape = (
 
   return (
     <g>
-      {/* 기본 섹터 (외곽선 강조) */}
+      {/* 그룹 전체 섹터 — 인접 조각들의 내부 경계선을 덮어 한 덩어리로 보이게 함.
+          색상 통일(Mode 1 그룹 팔레트 / Mode 2/3 시리즈 팔레트) 덕분에 fill 이 형제와
+          같아 overlap 시 이음매가 안 보임. 외곽 stroke 으로 그룹 경계 강조. */}
       <Sector
         cx={cx}
         cy={cy}
@@ -262,7 +266,7 @@ const renderTwoLevelActiveShape = (
         stroke="hsl(var(--background))"
         strokeWidth={2}
       />
-      {/* 외부 링 강조 */}
+      {/* 외부 링 강조 — 그룹 전체 범위. */}
       <Sector
         cx={cx}
         cy={cy}
@@ -272,21 +276,18 @@ const renderTwoLevelActiveShape = (
         outerRadius={(outerRadius ?? 0) + 10}
         fill={fill}
       />
-      {/* 연결선 */}
+      {/* 연결선 — 그룹 midAngle 기준. */}
       <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={fill} fill="none" />
-      {/* 연결점 */}
       <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
-      {/* 값 텍스트 — SVG <title> 로 원본 노출 */}
       <text
         x={ex + (cos >= 0 ? 1 : -1) * 8}
         y={ey}
         textAnchor={textAnchor}
         style={{ fill: "hsl(var(--foreground))", fontSize: 11 }}
       >
-        <title>{`${truncatedName}: ${formatFull(displayValue)}`}</title>
-        {truncatedName}: {formatPieCalloutValue(displayValue)}
+        <title>{`${headerFull}: ${formatFull(displayValue)}`}</title>
+        {headerTruncated}: {formatPieCalloutValue(displayValue)}
       </text>
-      {/* 비율 텍스트 */}
       <text
         x={ex + (cos >= 0 ? 1 : -1) * 8}
         y={ey}
@@ -310,6 +311,8 @@ export function RechartsTwoLevelPieWrapper({
   allSeriesFields,
   onTooltipChange,
   seriesLabelMap,
+  seriesColorsById,
+  groupHeaderColorsByName,
 }: RechartsTwoLevelPieWrapperProps) {
   const [selectedTimepointOverride, setSelectedTimepointOverride] = useState<string | null>(null);
   const timepointList = useMemo(() => timepointData ?? [], [timepointData]);
@@ -476,12 +479,13 @@ export function RechartsTwoLevelPieWrapper({
     [activeGroupKey, isGroupInnerMode, seriesToGroupKey]
   );
 
+  // inner.name은 양쪽 Mode에서 그룹 키와 동일:
+  //   Mode 1 (isGroupInnerMode=true, groupKeyField="name"): inner.name === outer.name
+  //   Mode 2/3 (isGroupInnerMode=false, groupKeyField="series"): inner.name === outer.series
+  // 따라서 그룹 식별자는 innerName 그 자체.
   const getOuterGroupNameForInner = useCallback(
-    (innerName: string): string | undefined => {
-      if (isGroupInnerMode) return innerName;
-      return filteredOuterData.find((item) => item.series === innerName)?.name;
-    },
-    [isGroupInnerMode, filteredOuterData]
+    (innerName: string): string | undefined => innerName,
+    []
   );
 
   const getOuterDataForInner = useCallback(
@@ -494,105 +498,62 @@ export function RechartsTwoLevelPieWrapper({
     [isGroupInnerMode, filteredOuterData]
   );
 
-  const getGroupBaseColor = useCallback(
+  // 그룹명 → 그룹 전용 팔레트 색 해석. prop 이 없으면 fallback (기존 wrapper colors 팔레트) 에서 조회.
+  const resolveGroupColor = useCallback(
     (groupName: string): string => {
-      const groupNumMatch = groupName.match(/^그룹(\d+)$/);
-      if (groupNumMatch) {
-        const groupIndex = parseInt(groupNumMatch[1], 10) - 1;
-        return colors[groupIndex % colors.length];
-      }
-
+      const mapped = groupHeaderColorsByName?.[groupName];
+      if (mapped) return mapped;
       const groupedIndex = groupedOuterNames.indexOf(groupName);
       if (groupedIndex >= 0) return colors[groupedIndex % colors.length];
-
-      const fallbackIndex = allSeriesFields.indexOf(groupName);
-      return colors[(fallbackIndex >= 0 ? fallbackIndex : 0) % colors.length];
+      return colors[0];
     },
-    [groupedOuterNames, colors, allSeriesFields]
+    [groupHeaderColorsByName, groupedOuterNames, colors]
   );
 
-  const getGroupedSeriesColor = useCallback(
-    (groupName: string, seriesName: string): string => {
-      const baseColor = getGroupBaseColor(groupName);
-      const groupSeriesData = filteredOuterData.filter((item) => item.name === groupName);
-      const seriesSums = new Map<string, number>();
-
-      groupSeriesData.forEach((item) => {
-        seriesSums.set(item.series, (seriesSums.get(item.series) || 0) + item.value);
-      });
-
-      const sortedSeries = [...seriesSums.entries()].sort((a, b) => b[1] - a[1]);
-      const rank = sortedSeries.findIndex(([name]) => name === seriesName);
-      if (rank < 0) return adjustLightness(baseColor, -15);
-
-      const seriesCount = sortedSeries.length;
-      const lightnessStep = seriesCount > 1 ? 30 / (seriesCount - 1) : 0;
-      const adjustment = -15 + rank * lightnessStep;
-      return adjustLightness(baseColor, adjustment);
+  // 시리즈 id → 안정된 원본 색 해석. prop 이 없으면 wrapper 로컬 팔레트 fallback.
+  const resolveSeriesColor = useCallback(
+    (seriesId: string): string => {
+      const mapped = seriesColorsById?.[seriesId];
+      if (mapped) return mapped;
+      return getColorForSeries(seriesId);
     },
-    [getGroupBaseColor, filteredOuterData]
+    [seriesColorsById, getColorForSeries]
   );
 
   const getInnerFillColor = useCallback(
     (innerName: string): string => {
+      // Mode 1 (isGroupInnerMode=true): inner 조각은 그룹 집계. 그룹 팔레트 색으로 통일.
       if (isGroupInnerMode) {
-        return adjustLightness(getGroupBaseColor(innerName), -15);
+        return resolveGroupColor(innerName);
       }
-
-      // Mode 1 (사용자 그룹): 내부 링은 시리즈별 고유 색 (그룹 hue와 독립).
-      // allSeriesFields는 그룹명 리스트이므로 getColorForSeries가 fallback 0으로만 반환.
-      // 그래서 filteredInnerData 순서 기반으로 팔레트 인덱스를 계산하고, 그룹 수만큼
-      // 시프트해 외부 그룹 색과 겹치지 않게 한다.
-      if (groupKeyField === "name") {
-        const seriesIdx = filteredInnerData.findIndex((item) => item.name === innerName);
-        const paletteIdx = seriesIdx >= 0
-          ? (groupedOuterNames.length + seriesIdx) % colors.length
-          : 0;
-        return adjustLightness(colors[paletteIdx], -15);
-      }
-
-      // Mode 2/3: 기존 로직 유지 (level1/field 기반 공통 색).
-      return adjustLightness(getColorForSeries(innerName), -15);
+      // Mode 2/3: inner.name 은 시리즈 id. 원본 시리즈 색 그대로.
+      return resolveSeriesColor(innerName);
     },
-    [isGroupInnerMode, getGroupBaseColor, groupKeyField, filteredInnerData, groupedOuterNames, colors, getColorForSeries]
+    [isGroupInnerMode, resolveGroupColor, resolveSeriesColor]
   );
 
   const getOuterFillColor = useCallback(
     (entry: TwoLevelPieOuterDataItem): string => {
-      // Mode 1 (사용자 그룹)을 최우선 — 같은 group name 을 공유하는 모든 섹터가
-      // 동일한 base color. 명도 조정 없음.
+      // Mode 1 (사용자 그룹): 외부 조각은 같은 그룹명을 공유 → 그룹 팔레트 색으로 묶음 시각화.
       if (groupKeyField === "name") {
-        return getGroupBaseColor(entry.name);
+        return resolveGroupColor(entry.name);
       }
-
-      if (isGroupInnerMode) {
-        return getGroupedSeriesColor(entry.name, entry.series);
-      }
-
-      // Mode 2/3: 기존 로직 유지 (series = level1/field 기반 공통 색).
-      return adjustLightness(getColorForSeries(entry.series), -15);
+      // Mode 2/3: 외부 조각은 시리즈 단위. 원본 시리즈 색 그대로 (명도 차등 없음).
+      return resolveSeriesColor(entry.series);
     },
-    [isGroupInnerMode, getGroupedSeriesColor, groupKeyField, getGroupBaseColor, getColorForSeries]
+    [groupKeyField, resolveGroupColor, resolveSeriesColor]
   );
 
+  // 그룹 합계는 groupKeyField 기준으로 집계해야 activeShape 의 rawGroupKey 조회와 일치.
+  // Mode 1: key=item.name (그룹명 중복 합산), Mode 2/3: key=item.series (시리즈별 합산).
   const groupSums = useMemo(() => {
     const sums = new Map<string, number>();
     filteredOuterData.forEach((item) => {
-      sums.set(item.name, (sums.get(item.name) || 0) + item.value);
+      const key = item[groupKeyField];
+      sums.set(key, (sums.get(key) || 0) + item.value);
     });
     return sums;
-  }, [filteredOuterData]);
-
-  const firstInnerPerGroup = useMemo(() => {
-    const firstInnerMap = new Map<string, string>();
-    innerAngles.forEach((innerAngle) => {
-      const groupName = getOuterGroupNameForInner(innerAngle.name);
-      if (groupName && !firstInnerMap.has(groupName)) {
-        firstInnerMap.set(groupName, innerAngle.name);
-      }
-    });
-    return firstInnerMap;
-  }, [innerAngles, getOuterGroupNameForInner]);
+  }, [filteredOuterData, groupKeyField]);
 
   // 내부 원 호버 핸들러
   const onInnerPieEnter = useCallback(
@@ -637,8 +598,19 @@ export function RechartsTwoLevelPieWrapper({
         const isThisSeriesActive = activeOuterKey === seriesAngle.name;
         const isAnyHovered = activeOuterIndex !== undefined;
         const groupName = getOuterGroupNameForInner(seriesAngle.name);
-        const isFirstInGroup = groupName ? firstInnerPerGroup.get(groupName) === seriesAngle.name : false;
         const groupSum = groupName ? groupSums.get(groupName) : undefined;
+        // 그룹 내 최대 슬라이스 각도(도) 계산. 하나라도 LABEL_MIN_ANGLE_DEGREES 이상이면
+        // 그룹 전체 라벨 표시 (all-or-none). Mode 2/3 에서는 label 함수가 다른 분기를 타서
+        // 이 값은 Mode 1 의 perSliceMode 분기에서만 의미.
+        const pieTotalValue = seriesOuterData.reduce((sum, d) => sum + d.value, 0);
+        const pieSpanDeg = Math.abs(seriesAngle.endAngle - seriesAngle.startAngle);
+        const maxSliceAngleDeg = pieTotalValue > 0
+          ? seriesOuterData.reduce(
+              (maxDeg, d) => Math.max(maxDeg, (d.value / pieTotalValue) * pieSpanDeg),
+              0,
+            )
+          : 0;
+        const shouldShowGroupLabels = maxSliceAngleDeg >= LABEL_MIN_ANGLE_DEGREES;
 
         return (
           <Pie
@@ -653,11 +625,26 @@ export function RechartsTwoLevelPieWrapper({
             innerRadius="60%"
             outerRadius="80%"
             activeIndex={isThisSeriesActive ? activeOuterIndex : undefined}
-            activeShape={(props) => renderTwoLevelActiveShape(props, allOuterSum, seriesLabelMap, groupKeyField, groupSums)}
-            label={isFirstInGroup
-              ? (props) => renderTwoLevelDefaultLabel(props, 0.01, isAnyHovered, allOuterSum, groupName, groupSum, seriesLabelMap)
-              : false
-            }
+            activeShape={(props) => renderTwoLevelActiveShape(
+              props,
+              allOuterSum,
+              seriesLabelMap,
+              groupKeyField,
+              groupSums,
+              seriesAngle.startAngle,
+              seriesAngle.endAngle,
+            )}
+            label={(props) => renderTwoLevelDefaultLabel(
+              props,
+              0.01,
+              isAnyHovered,
+              allOuterSum,
+              groupName,
+              groupSum,
+              seriesLabelMap,
+              groupKeyField === "name", // Mode 1 → 조각별 시리즈 라벨
+              shouldShowGroupLabels,
+            )}
             labelLine={false}
             onMouseEnter={(_: any, index: number) => {
               const item = seriesOuterData[index];
@@ -677,6 +664,7 @@ export function RechartsTwoLevelPieWrapper({
               <Cell
                 key={`outer-${entry.name}-${idx}`}
                 fill={applyAlpha(getOuterFillColor(entry), getOuterOpacity(entry))}
+                stroke="none"
               />
             ))}
           </Pie>
@@ -689,7 +677,6 @@ export function RechartsTwoLevelPieWrapper({
       activeOuterKey,
       activeOuterIndex,
       getOuterGroupNameForInner,
-      firstInnerPerGroup,
       groupSums,
       allOuterSum,
       onTooltipChange,
