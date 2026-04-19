@@ -481,7 +481,7 @@ const data: ChartData = {
 - **style**: `innerRadius?`로 도넛화. Row mode 사용 시 `timepointPie.selectedKey`로 시점 선택, `timepointPie.enabled`로 필드 토글.
 - **유효성**: 음수 불허.
 
-### 8.2 chartCore/two-level-pie **[WIP]**
+### 8.2 chartCore/two-level-pie
 
 2단 원형(그룹 링 + 항목 링). 그룹 설정이 필요해서 Row mode가 사실상 필수.
 
@@ -507,7 +507,7 @@ const data: ChartData = {
   />
   ```
 - **style**: `PieStyle.twoLevelPie.{selectedKey, hierarchyGroups, assignments}`. `assignments`로 시리즈별 그룹 번호를 직접 줄 수도 있음.
-- **유효성**: 음수 불허. 현재 **WIP 상태**(드롭다운에 표시됨) — 범례/그룹 색상 관련 수정 진행 중.
+- **유효성**: 음수 불허.
 
 ### 8.3 chartCore/treemap
 
@@ -747,7 +747,7 @@ Waterfall 형태 가치 변환 다리.
 | `chartCore/dual-axis` | 5 | 2 | ✓ | |
 | `chartCore/dual-axis-stacked-bar` | 3 | 3 | ✗ | |
 | `chartCore/pie` | — | — | ✗ | |
-| `chartCore/two-level-pie` **[WIP]** | — | — | ✗ | |
+| `chartCore/two-level-pie` | — | — | ✗ | |
 | `chartCore/treemap` | — | 2 | ✗ | |
 | `chartCore/multi-level-treemap` **[WIP]** | — | 1 | ✗ | |
 | `chartCore/ranking-bar` | — | 3 | ✓ | |

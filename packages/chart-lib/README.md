@@ -153,7 +153,7 @@ UI에서 선택 가능한 활성 차트 유형 목록.
 | `chartCore/stacked-area` | Stacked Area |
 | `chartCore/synced-area` | Synced Area |
 | `chartCore/pie` | Pie |
-| `chartCore/two-level-pie` | Two-Level Pie **(WIP)** |
+| `chartCore/two-level-pie` | Two-Level Pie |
 | `chartCore/treemap` | Treemap |
 | `chartCore/multi-level-treemap` | Multi-Level Treemap **(WIP)** |
 | `chartCore/ranking-bar` | Ranking Bar |
