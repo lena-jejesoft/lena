@@ -186,4 +186,4 @@ UI에서 선택 가능한 활성 차트 유형 목록.
 
 ## 피드백
 
-시험 사용 후 피드백은 [양식 링크 - 추후 공유]에 남겨주세요.
+시험 사용 후 피드백은 [피드백 양식](https://docs.google.com/forms/d/1BZHh3JyCU2dv5qDWmzNxTobzg34jlwL2p6_980S7Uw8/preview)에 남겨주세요.
