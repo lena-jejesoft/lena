@@ -1618,8 +1618,13 @@ export default function ChartToolView({
                   />
                 )}
               </div>
-              {/* 우측 레전드 */}
-              {shouldRenderInlineLegend && legendPanelNode}
+              {/* 우측 레전드 — ChartLegendPanel 자체는 부모 너비를 채우므로 inline 경로에서는
+                  고정 260px 사이드바 폭을 외부에서 지정해 기존 레이아웃을 유지. */}
+              {shouldRenderInlineLegend && (
+                <div className="shrink-0" style={{ width: 260 }}>
+                  {legendPanelNode}
+                </div>
+              )}
             </div>
           ) : (
             <div className="flex items-center justify-center h-[400px] text-muted-foreground text-sm">
