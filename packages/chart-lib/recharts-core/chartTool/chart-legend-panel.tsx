@@ -708,7 +708,7 @@ export function ChartLegendPanel({
                       className="w-2 h-2 flex-shrink-0"
                       style={{ backgroundColor: parentColor }}
                     />
-                    <span className="text-xs font-medium">{parentName}</span>
+                    <span className="text-xs font-medium">{getSeriesLabel(parentName)}</span>
                   </div>
                   {/* 하위 시리즈 */}
                   <div className="ml-4 space-y-0.5">
@@ -722,7 +722,7 @@ export function ChartLegendPanel({
                             className="w-2 h-2 rounded-sm flex-shrink-0"
                             style={{ backgroundColor: parentColor, opacity: 0.7 }}
                           />
-                          <span className="text-xs text-muted-foreground truncate">{item.name}</span>
+                          <span className="text-xs text-muted-foreground truncate">{getSeriesLabel(item.name)}</span>
                         </div>
                         <div className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
                           {item.value.toLocaleString()} ({item.percentage.toFixed(1)}%)
@@ -749,7 +749,7 @@ export function ChartLegendPanel({
                           className="w-2 h-2 flex-shrink-0"
                           style={{ backgroundColor: group.color }}
                         />
-                        <span className="text-xs font-medium truncate">{group.name}</span>
+                        <span className="text-xs font-medium truncate">{getSeriesLabel(group.name)}</span>
                       </div>
                       <div className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
                         {group.value.toLocaleString()} ({group.percentage.toFixed(1)}%)

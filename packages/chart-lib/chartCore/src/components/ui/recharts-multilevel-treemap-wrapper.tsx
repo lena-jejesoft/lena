@@ -77,6 +77,8 @@ interface CustomContentProps {
   parentColor?: string;  // 드릴다운 상태에서 부모 색상
   level3Color?: string;  // 3단계에서 사용할 미리 계산된 색상
   seriesLabelMap?: Record<string, string>;
+  hoveredCellName?: string | null;  // 현재 호버된 셀 이름 (시각 강조용)
+  onHoverChange?: (name: string | null) => void;  // 셀 mouseEnter/Leave 통지
 }
 
 // 색상 밝기 조절 함수 (드릴다운 그라데이션용)
@@ -143,7 +145,8 @@ const CustomizedContent: React.FC<CustomContentProps> = (props) => {
     x = 0, y = 0, width = 0, height = 0,
     name, index = 0, colors, allSeriesFields,
     size, seriesName, children, onNodeClick, onTooltipChange, isDrilledDown, totalSize = 0, filteredData,
-    selectedTimepoint, parentColor, level3Color, seriesLabelMap
+    selectedTimepoint, parentColor, level3Color, seriesLabelMap,
+    hoveredCellName, onHoverChange,
   } = props;
 
   const hasChildren = children && children.length > 0;
@@ -203,12 +206,16 @@ const CustomizedContent: React.FC<CustomContentProps> = (props) => {
       // 시점 모드에서는 레이블을 시점으로 고정
       onTooltipChange(allSeriesValues, selectedTimepoint || null);
     }
-  }, [onTooltipChange, filteredData, name, allSeriesFields, colors, selectedTimepoint]);
+    if (name) onHoverChange?.(name);
+  }, [onTooltipChange, filteredData, name, allSeriesFields, colors, selectedTimepoint, onHoverChange]);
 
   const handleMouseLeave = useCallback(() => {
     // 시점 모드에서는 마우스를 떼도 시점 레이블 유지
     onTooltipChange?.(null, selectedTimepoint || null);
-  }, [onTooltipChange, selectedTimepoint]);
+    onHoverChange?.(null);
+  }, [onTooltipChange, selectedTimepoint, onHoverChange]);
+
+  const isHovered = Boolean(name && hoveredCellName === name);
 
   return (
     <g>
@@ -219,9 +226,13 @@ const CustomizedContent: React.FC<CustomContentProps> = (props) => {
         height={height}
         style={{
           fill: fillColor,
-          stroke: "#fff",
-          strokeWidth: 2,
+          // 호버 시 stroke 색을 강조하고 두께를 키워 셀 경계를 선명하게 한다.
+          // 색 대비 (#fff → foreground HSL) + 두께 변화 (2 → 3) 로 TLP 의 merged
+          // sector 수준은 아니어도 "반응 없음" 상태를 해소.
+          stroke: isHovered ? "hsl(var(--foreground))" : "#fff",
+          strokeWidth: isHovered ? 3 : 2,
           cursor: hasChildren || isDrilledDown ? "pointer" : "default",
+          transition: "stroke 150ms ease, stroke-width 150ms ease",
         }}
         onClick={handleClick}
         onMouseEnter={handleMouseEnter}
@@ -309,6 +320,9 @@ export function RechartsMultiLevelTreemapWrapper({
     return MULTI_LEVEL_TREEMAP_COLORS;
   }, [customColors, themeColors?.seriesColors]);
   const [selectedTimepoint, setSelectedTimepoint] = useState<string | null>(null);
+  // 현재 호버된 셀 이름 (시각 강조용). Recharts Treemap content 가 cloneElement 로
+  // per-cell 렌더하므로 이 값 변화 시 전 셀 re-render. 셀 개수(수십) 기준 체감 비용 작음.
+  const [hoveredCellName, setHoveredCellName] = useState<string | null>(null);
 
   // 시점 선택 모드 확인
   const isTimepointMode = timepointData && timepointData.length > 0;
@@ -654,6 +668,8 @@ export function RechartsMultiLevelTreemapWrapper({
                 parentColor={parentColor}
                 level3Color={level3Color}
                 seriesLabelMap={seriesLabelMap}
+                hoveredCellName={hoveredCellName}
+                onHoverChange={setHoveredCellName}
               />
             }
           />
@@ -695,6 +711,9 @@ export function RechartsMultiLevelTreemapWrapper({
               selectedTimepoint={selectedTimepoint}
               parentColor={parentColor}
               level3Color={level3Color}
+              seriesLabelMap={seriesLabelMap}
+              hoveredCellName={hoveredCellName}
+              onHoverChange={setHoveredCellName}
             />
           }
         />

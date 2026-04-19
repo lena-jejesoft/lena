@@ -832,7 +832,7 @@ export function ChartLegendPanel({
                         className="w-3 h-3 rounded-sm flex-shrink-0"
                         style={{ backgroundColor: parentColor }}
                       />
-                      <span className="text-xs font-medium">{parentName}</span>
+                      <span className="text-xs font-medium">{getSeriesLabel(parentName)}</span>
                     </div>
                     {/* 하위 시리즈 */}
                     <div className="ml-4 space-y-0.5">
@@ -858,7 +858,7 @@ export function ChartLegendPanel({
                                   className="w-2 h-2 rounded-sm flex-shrink-0"
                                   style={{ backgroundColor: gradientColor }}
                                 />
-                                <span className="text-xs text-muted-foreground truncate">{item.name}</span>
+                                <span className="text-xs text-muted-foreground truncate">{getSeriesLabel(item.name)}</span>
                               </div>
                               <div
                                 className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0"
@@ -889,7 +889,7 @@ export function ChartLegendPanel({
                             className="w-3 h-3 rounded-sm flex-shrink-0"
                             style={{ backgroundColor: group.color }}
                           />
-                          <span className="text-xs font-medium truncate">{group.name}</span>
+                          <span className="text-xs font-medium truncate">{getSeriesLabel(group.name)}</span>
                         </div>
                         <div
                           className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0"
