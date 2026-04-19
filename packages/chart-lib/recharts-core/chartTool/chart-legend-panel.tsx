@@ -393,11 +393,8 @@ export function ChartLegendPanel({
   const hasThemeControl = Boolean(onThemeChange);
 
   return (
-    <div className="flex flex-nowrap flex-shrink-0">
-      <div
-        className="flex-shrink-0 flex flex-col border-l bg-card/50 px-4 pt-3 pb-4"
-        style={{ width: '260px' }}
-      >
+    // 부모 컨테이너 너비를 그대로 채운다. File B 와 동일한 유연화.
+    <div className="flex flex-col border-l bg-card/50 px-4 pt-3 pb-4 w-full min-w-0">
       {/* 차트 컨트롤 (차트 유형 + 이상치 토글 + 테마 토글) */}
       {controlsEnabled && (hasChartTypeControl || hasOutlierControl || hasThemeControl) && (
         <>
@@ -926,7 +923,6 @@ export function ChartLegendPanel({
           onGroupsChange={onHierarchyGroupsChange}
         />
       )}
-      </div>
     </div>
   );
 }

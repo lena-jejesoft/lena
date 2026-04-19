@@ -329,11 +329,10 @@ export function ChartLegendPanel({
   const allEnabled = enabledSeries.size === seriesFields.length;
 
   return (
-    <div className="flex">
-      <div
-        className="flex-shrink-0 flex flex-col border-l bg-card/50 px-4 pt-[22px] pb-4"
-        style={{ width: '260px' }}
-      >
+    // 부모 컨테이너 너비를 그대로 채운다. 고정 260px 하드코딩을 제거해 포털 호스트/사이드
+    // 패널의 실제 너비에 맞춰 legend 가 확장/축소된다. 기존 inline 렌더 (chart tool 자체
+    // UI) 는 호출부에서 `w-[260px]` 래퍼로 폭을 유지한다.
+    <div className="flex flex-col border-l bg-card/50 px-4 pt-[22px] pb-4 w-full min-w-0">
         {/* 기존 title, description */}
         {title && (
           <h3 className="text-sm font-semibold text-muted-foreground mb-1 mt-2">
@@ -1148,7 +1147,7 @@ export function ChartLegendPanel({
           )}
         </div>
 
-      </div>
     </div>
   );
 }
+
