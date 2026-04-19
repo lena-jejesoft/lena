@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import type { ChartType, LegendValueState, YAxisPlacement, HierarchyGroup } from "../recharts-type";
+import { TruncatedTitle } from "@/packages/chart-lib/components/truncated-title";
 
 interface LegendItemProps {
   name: string;
@@ -377,7 +378,6 @@ export function LegendItem({
             ? "hover:scale-[1.02]"
             : "opacity-50"
         )}
-        title={label}
       >
         {/* 색상 인디케이터 */}
         <div className={cn(
@@ -428,12 +428,15 @@ export function LegendItem({
             />
           )}
 
-          {/* 시리즈명 */}
-          <span className={cn(
-            "text-xs truncate",
-            (chartType !== "ranking-bar" && chartType !== "geo-grid" && chartType !== "regression-scatter") ? "text-foreground" : "font-medium text-muted-foreground",
-            !enabled && "opacity-60"
-          )}>
+          {/* 시리즈명 — 잘릴 때만 title 표시 */}
+          <TruncatedTitle
+            text={label}
+            className={cn(
+              "text-xs truncate",
+              (chartType !== "ranking-bar" && chartType !== "geo-grid" && chartType !== "regression-scatter") ? "text-foreground" : "font-medium text-muted-foreground",
+              !enabled && "opacity-60"
+            )}
+          >
             {label}
             {/* 이중축 배치 표시 뱃지 */}
             {yAxisPlacement && (
@@ -441,7 +444,7 @@ export function LegendItem({
                 ({yAxisPlacement === 'right' ? '우' : '좌'})
               </span>
             )}
-          </span>
+          </TruncatedTitle>
         </div>
 
         {/* 값 (우측 정렬) */}

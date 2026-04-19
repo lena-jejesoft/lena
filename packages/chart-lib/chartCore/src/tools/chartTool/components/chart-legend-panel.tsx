@@ -16,6 +16,7 @@ import {
   formatPercent,
   formatStat,
 } from "@/packages/chart-lib/utils/number-formatters";
+import { TruncatedTitle } from "@/packages/chart-lib/components/truncated-title";
 
 // 레전드용 랭킹 색상 - Anthropic 브랜드 기반 (Crail)
 const RANKING_LEGEND_COLOR_START = "#C15F3C";  // Crail (진한 러스트 오렌지)
@@ -369,7 +370,7 @@ export function ChartLegendPanel({
                             className="w-2 h-2 rounded-full flex-shrink-0"
                             style={{ backgroundColor: seriesColors[seriesFields.indexOf(field) % seriesColors.length] }}
                           />
-                          <span className="truncate">{getSeriesLabel(field)}</span>
+                          <TruncatedTitle className="truncate" text={getSeriesLabel(field)} />
                         </div>
                       </SelectItem>
                     ))}
@@ -390,7 +391,7 @@ export function ChartLegendPanel({
                             className="w-2 h-2 rounded-full flex-shrink-0"
                             style={{ backgroundColor: seriesColors[seriesFields.indexOf(field) % seriesColors.length] }}
                           />
-                          <span className="truncate">{getSeriesLabel(field)}</span>
+                          <TruncatedTitle className="truncate" text={getSeriesLabel(field)} />
                         </div>
                       </SelectItem>
                     ))}
@@ -424,7 +425,7 @@ export function ChartLegendPanel({
                             className="w-2 h-2 rounded-full flex-shrink-0"
                             style={{ backgroundColor: seriesColors[seriesFields.indexOf(field) % seriesColors.length] }}
                           />
-                          <span className="truncate">{getSeriesLabel(field)}</span>
+                          <TruncatedTitle className="truncate" text={getSeriesLabel(field)} />
                         </div>
                       </SelectItem>
                     ))}
@@ -445,7 +446,7 @@ export function ChartLegendPanel({
                             className="w-2 h-2 rounded-full flex-shrink-0"
                             style={{ backgroundColor: seriesColors[seriesFields.indexOf(field) % seriesColors.length] }}
                           />
-                          <span className="truncate">{getSeriesLabel(field)}</span>
+                          <TruncatedTitle className="truncate" text={getSeriesLabel(field)} />
                         </div>
                       </SelectItem>
                     ))}
@@ -586,7 +587,7 @@ export function ChartLegendPanel({
                               style={{ backgroundColor: markerColor }}
                             />
                             <span className="text-xs text-muted-foreground flex-shrink-0">{actualRank}위</span>
-                            <span className="text-xs text-foreground truncate" title={getSeriesLabel(item.name)}>{getSeriesLabel(item.name)}</span>
+                            <TruncatedTitle className="text-xs text-foreground truncate" text={getSeriesLabel(item.name)} />
                           </div>
                           <span
                             className="text-xs font-medium text-muted-foreground flex-shrink-0"
@@ -858,7 +859,7 @@ export function ChartLegendPanel({
                                   className="w-2 h-2 rounded-sm flex-shrink-0"
                                   style={{ backgroundColor: gradientColor }}
                                 />
-                                <span className="text-xs text-muted-foreground truncate">{item.name}</span>
+                                <TruncatedTitle className="text-xs text-muted-foreground truncate" text={item.name} />
                               </div>
                               <div
                                 className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0"
@@ -889,7 +890,7 @@ export function ChartLegendPanel({
                             className="w-3 h-3 rounded-sm flex-shrink-0"
                             style={{ backgroundColor: group.color }}
                           />
-                          <span className="text-xs font-medium truncate">{group.name}</span>
+                          <TruncatedTitle className="text-xs font-medium truncate" text={group.name} />
                         </div>
                         <div
                           className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0"
@@ -924,7 +925,7 @@ export function ChartLegendPanel({
                                       className="w-2 h-2 rounded-sm flex-shrink-0"
                                       style={{ backgroundColor: gradientColor }}
                                     />
-                                    <span className="text-xs text-muted-foreground truncate">{getSeriesLabel(child.name)}</span>
+                                    <TruncatedTitle className="text-xs text-muted-foreground truncate" text={getSeriesLabel(child.name)} />
                                   </div>
                                   <div
                                     className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0"
@@ -993,7 +994,7 @@ export function ChartLegendPanel({
                               className="w-3 h-3 rounded-sm flex-shrink-0"
                               style={{ backgroundColor: groupHeaderColorsByName?.[group.name] ?? seriesColors[groupIdx % seriesColors.length] }}
                             />
-                            <span className="text-sm font-medium truncate" title={getSeriesLabel(group.name)}>{getSeriesLabel(group.name)}</span>
+                            <TruncatedTitle className="text-sm font-medium truncate" text={getSeriesLabel(group.name)} />
                           </div>
                           <div
                             className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0"
@@ -1023,7 +1024,7 @@ export function ChartLegendPanel({
                                     className="w-2 h-2 rounded-sm flex-shrink-0"
                                     style={{ backgroundColor: seriesColor }}
                                   />
-                                  <span className="text-xs text-muted-foreground truncate">{getSeriesLabel(seriesName)}</span>
+                                  <TruncatedTitle className="text-xs text-muted-foreground truncate" text={getSeriesLabel(seriesName)} />
                                 </div>
                                 <div
                                   className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0"

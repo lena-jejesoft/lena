@@ -13,6 +13,7 @@ import type { ChartType, ExtendedDataAnalysisResult, LegendValueState, YAxisPlac
 import { cn } from "@/lib/utils";
 import { interpolateColor } from "../recharts-ranking-bar-wrapper";
 import type { TimepointTwoLevelPieData } from "../recharts-two-level-pie-wrapper";
+import { TruncatedTitle } from "@/packages/chart-lib/components/truncated-title";
 
 interface TreemapSeriesData {
   name: string;
@@ -476,7 +477,7 @@ export function ChartLegendPanel({
                         className="w-2 h-2 rounded-full flex-shrink-0"
                         style={{ backgroundColor: seriesColors[seriesFields.indexOf(field) % seriesColors.length] }}
                       />
-                      <span className="truncate">{getSeriesLabel(field)}</span>
+                      <TruncatedTitle className="truncate" text={getSeriesLabel(field)} />
                     </div>
                   </SelectItem>
                 ))}
@@ -497,7 +498,7 @@ export function ChartLegendPanel({
                         className="w-2 h-2 rounded-full flex-shrink-0"
                         style={{ backgroundColor: seriesColors[seriesFields.indexOf(field) % seriesColors.length] }}
                       />
-                      <span className="truncate">{getSeriesLabel(field)}</span>
+                      <TruncatedTitle className="truncate" text={getSeriesLabel(field)} />
                     </div>
                   </SelectItem>
                 ))}
@@ -524,7 +525,7 @@ export function ChartLegendPanel({
                         className="w-2 h-2 rounded-full flex-shrink-0"
                         style={{ backgroundColor: seriesColors[seriesFields.indexOf(field) % seriesColors.length] }}
                       />
-                      <span className="truncate">{getSeriesLabel(field)}</span>
+                      <TruncatedTitle className="truncate" text={getSeriesLabel(field)} />
                     </div>
                   </SelectItem>
                 ))}
@@ -545,7 +546,7 @@ export function ChartLegendPanel({
                         className="w-2 h-2 rounded-full flex-shrink-0"
                         style={{ backgroundColor: seriesColors[seriesFields.indexOf(field) % seriesColors.length] }}
                       />
-                      <span className="truncate">{getSeriesLabel(field)}</span>
+                      <TruncatedTitle className="truncate" text={getSeriesLabel(field)} />
                     </div>
                   </SelectItem>
                 ))}
@@ -663,9 +664,9 @@ export function ChartLegendPanel({
                     const labelText = `${getSeriesLabel(String(item.dataKey ?? ""))}(${idx === 0 ? 'X' : 'Y'}):`;
                     return (
                       <div key={idx} className="flex items-center justify-between gap-2">
-                        <span className="text-xs text-gray-700 truncate min-w-0" title={labelText}>
+                        <TruncatedTitle className="text-xs text-gray-700 truncate min-w-0" text={labelText}>
                           {labelText}
-                        </span>
+                        </TruncatedTitle>
                         <span className="text-xs font-medium text-gray-700 whitespace-nowrap flex-shrink-0">
                           {formatValue(item.value)}
                         </span>
@@ -722,7 +723,7 @@ export function ChartLegendPanel({
                             className="w-2 h-2 rounded-sm flex-shrink-0"
                             style={{ backgroundColor: parentColor, opacity: 0.7 }}
                           />
-                          <span className="text-xs text-muted-foreground truncate">{item.name}</span>
+                          <TruncatedTitle className="text-xs text-muted-foreground truncate" text={item.name} />
                         </div>
                         <div className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
                           {item.value.toLocaleString()} ({item.percentage.toFixed(1)}%)
@@ -749,7 +750,7 @@ export function ChartLegendPanel({
                           className="w-2 h-2 flex-shrink-0"
                           style={{ backgroundColor: group.color }}
                         />
-                        <span className="text-xs font-medium truncate">{group.name}</span>
+                        <TruncatedTitle className="text-xs font-medium truncate" text={group.name} />
                       </div>
                       <div className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
                         {group.value.toLocaleString()} ({group.percentage.toFixed(1)}%)
@@ -768,7 +769,7 @@ export function ChartLegendPanel({
                                 className="w-2 h-2 rounded-sm flex-shrink-0"
                                 style={{ backgroundColor: group.color, opacity: 0.7 }}
                               />
-                              <span className="text-xs text-muted-foreground truncate">{getSeriesLabel(child.name)}</span>
+                              <TruncatedTitle className="text-xs text-muted-foreground truncate" text={getSeriesLabel(child.name)} />
                             </div>
                             <div className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
                               {child.value.toLocaleString()} ({child.percentage.toFixed(1)}%)
@@ -823,7 +824,7 @@ export function ChartLegendPanel({
                             className="w-3 h-3 rounded-sm flex-shrink-0"
                             style={{ backgroundColor: groupHeaderColorsByName?.[group.name] ?? seriesColors[groupIdx % seriesColors.length] }}
                           />
-                          <span className="text-sm font-medium truncate">{group.name}</span>
+                          <TruncatedTitle className="text-sm font-medium truncate" text={group.name} />
                         </div>
                         <div className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
                           {groupTotal.toLocaleString()} ({groupPercentage.toFixed(1)}%)
@@ -851,7 +852,7 @@ export function ChartLegendPanel({
                                   className="w-2 h-2 rounded-sm flex-shrink-0"
                                   style={{ backgroundColor: seriesColor }}
                                 />
-                                <span className="text-xs text-muted-foreground truncate">{getSeriesLabel(seriesName)}</span>
+                                <TruncatedTitle className="text-xs text-muted-foreground truncate" text={getSeriesLabel(seriesName)} />
                               </div>
                               <div className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
                                 {seriesValue.toLocaleString()} ({seriesPercentage.toFixed(1)}%)
