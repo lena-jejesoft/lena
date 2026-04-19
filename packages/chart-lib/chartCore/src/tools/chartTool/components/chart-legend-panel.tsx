@@ -115,6 +115,10 @@ interface ChartLegendPanelProps {
   allSeriesFieldsForHierarchy?: string[];  // 계층 그룹 설정용 원본 시리즈
   twoLevelPieOuterData?: Array<{ name: string; value: number; series: string }>;  // 외부 링 데이터
   twoLevelPieTimepointData?: TimepointTwoLevelPieData[];  // 시점별 2단계 파이 데이터
+  // Two-Level Pie 시리즈 마커 전용: series.id → 안정된 원본 색. 그룹 할당과 무관.
+  seriesColorsById?: Record<string, string>;
+  // Two-Level Pie 그룹 헤더 전용: groupName → 그룹 팔레트 색. 시리즈 팔레트와 겹치지 않음.
+  groupHeaderColorsByName?: Record<string, string>;
 }
 
 // 로컬 포맷터는 공용 유틸로 대체. 축약 표시는 formatLegendValue, 원본은 formatFull.
@@ -160,6 +164,8 @@ export function ChartLegendPanel({
   allSeriesFieldsForHierarchy,
   twoLevelPieOuterData,
   twoLevelPieTimepointData,
+  seriesColorsById,
+  groupHeaderColorsByName,
 }: ChartLegendPanelProps) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);  // 이중축 편집 모드
@@ -193,14 +199,12 @@ export function ChartLegendPanel({
     return color;
   };
 
-  // 2단계 원형 / 멀티레벨 트리맵 편집 모드에서 그룹 기반 색상 결정
+  // 2단계 원형 / 멀티레벨 트리맵 편집 모드에서 시리즈 마커 색 결정.
+  // 시리즈 id 기반 `seriesColorsById` 를 우선 사용해 그룹 할당과 무관하게 고정.
+  // fallback 은 기존 flat 팔레트 인덱싱 (주로 multi-level-treemap 경로).
   const getColorForTwoLevelPieEdit = (field: string): string => {
-    if ((chartType === 'two-level-pie' || chartType === 'multi-level-treemap') && isEditMode && hierarchyGroups) {
-      const groupIdx = hierarchyGroups.findIndex(g => g.series.includes(field));
-      if (groupIdx >= 0) {
-        return seriesColors[groupIdx % seriesColors.length];
-      }
-      return "hsl(0 0% 60%)"; // 미할당
+    if (chartType === 'two-level-pie' && seriesColorsById?.[field]) {
+      return seriesColorsById[field];
     }
     const effectiveFields = allSeriesFieldsForHierarchy || seriesFields;
     return seriesColors[effectiveFields.indexOf(field) % seriesColors.length];
@@ -987,7 +991,7 @@ export function ChartLegendPanel({
                           <div className="flex items-center gap-2 min-w-0">
                             <span
                               className="w-3 h-3 rounded-sm flex-shrink-0"
-                              style={{ backgroundColor: seriesColors[groupIdx % seriesColors.length] }}
+                              style={{ backgroundColor: groupHeaderColorsByName?.[group.name] ?? seriesColors[groupIdx % seriesColors.length] }}
                             />
                             <span className="text-sm font-medium truncate" title={getSeriesLabel(group.name)}>{getSeriesLabel(group.name)}</span>
                           </div>
@@ -1003,20 +1007,9 @@ export function ChartLegendPanel({
                           {group.series.map((seriesName) => {
                             const seriesValue = getOuterSeriesValue(seriesName);
                             const seriesPercentage = outerTotal > 0 ? (seriesValue / outerTotal) * 100 : 0;
-                            // 값 기준 순위 계산 (차트와 동일한 방식)
-                            const groupSeriesValues = group.series.map(s => ({
-                              name: s,
-                              value: getOuterSeriesValue(s)
-                            }));
-                            const sortedByValue = [...groupSeriesValues].sort((a, b) => b.value - a.value);
-                            const rank = sortedByValue.findIndex(d => d.name === seriesName);
-                            const baseColor = seriesColors[groupIdx % seriesColors.length];
-                            const lightnessStep = group.series.length > 1
-                              ? 30 / (group.series.length - 1)
-                              : 0;
-                            // rank 0은 -15 (내부 원과 동일), rank 증가할수록 밝게
-                            const adjustment = -15 + rank * lightnessStep;
-                            const seriesColor = adjustColorLightness(baseColor, adjustment);
+                            // 시리즈 마커는 id 기반 안정된 원본 색을 그대로 사용 (그룹 할당 무관).
+                            const seriesColor = seriesColorsById?.[seriesName]
+                              ?? seriesColors[seriesFields.indexOf(seriesName) % seriesColors.length];
 
                             return (
                               <div
