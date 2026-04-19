@@ -528,7 +528,7 @@ const data: ChartData = {
 - **style**: `TreemapStyle.treemap.{selectedKey, enabled}`. 값의 절댓값이 사각형 면적이 된다.
 - **유효성**: 시리즈 ≥ 2, 음수 불허.
 
-### 8.4 chartCore/multi-level-treemap **[WIP]**
+### 8.4 chartCore/multi-level-treemap
 
 다층 트리맵. 그룹 설정이 추가됨.
 
@@ -550,7 +550,7 @@ const data: ChartData = {
   />
   ```
 - **style**: `treemap.hierarchyGroups`가 핵심. 없으면 단층으로 동작.
-- **유효성**: 시리즈 ≥ 1, 음수 불허. 현재 **WIP 상태** — 범례 시리즈 라벨 관련 수정 진행 중.
+- **유효성**: 시리즈 ≥ 1, 음수 불허.
 
 ### 8.5 chartCore/ranking-bar
 
@@ -749,7 +749,7 @@ Waterfall 형태 가치 변환 다리.
 | `chartCore/pie` | — | — | ✗ | |
 | `chartCore/two-level-pie` | — | — | ✗ | |
 | `chartCore/treemap` | — | 2 | ✗ | |
-| `chartCore/multi-level-treemap` **[WIP]** | — | 1 | ✗ | |
+| `chartCore/multi-level-treemap` | — | 1 | ✗ | |
 | `chartCore/ranking-bar` | — | 3 | ✓ | |
 | `chartCore/geo-grid` | 1 (최대) | — | ✓ | `districtId` 필요 |
 | `chartCore/regression-scatter` | 10 | 2 | ✓ | |

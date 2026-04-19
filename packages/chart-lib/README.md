@@ -155,7 +155,7 @@ UI에서 선택 가능한 활성 차트 유형 목록.
 | `chartCore/pie` | Pie |
 | `chartCore/two-level-pie` | Two-Level Pie |
 | `chartCore/treemap` | Treemap |
-| `chartCore/multi-level-treemap` | Multi-Level Treemap **(WIP)** |
+| `chartCore/multi-level-treemap` | Multi-Level Treemap |
 | `chartCore/ranking-bar` | Ranking Bar |
 | `chartCore/geo-grid` | Geo Grid |
 | `chartCore/regression-scatter` | Regression Scatter |

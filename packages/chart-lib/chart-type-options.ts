@@ -24,7 +24,7 @@ export const CHART_TYPE_OPTIONS: ChartTypeOption[] = [
   { value: "chartCore/pie", label: "Pie", iconKey: "pie" },
   { value: "chartCore/two-level-pie", label: "Two-Level Pie", iconKey: "two-level-pie" },
   { value: "chartCore/treemap", label: "Treemap", iconKey: "treemap" },
-  { value: "chartCore/multi-level-treemap", label: "Multi-Level Treemap", iconKey: "treemap", wip: true },
+  { value: "chartCore/multi-level-treemap", label: "Multi-Level Treemap", iconKey: "treemap" },
   { value: "chartCore/ranking-bar", label: "Ranking Bar", iconKey: "bar" },
   { value: "chartCore/geo-grid", label: "Geo Grid", iconKey: "grid" },
   { value: "chartCore/regression-scatter", label: "Regression Scatter", iconKey: "regression-scatter" },
