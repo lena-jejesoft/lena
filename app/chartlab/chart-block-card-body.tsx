@@ -3239,7 +3239,7 @@ function Phase3Screen() {
         bordered
         className={cn(
           "shrink-0 transition-all duration-200",
-          isSidePanelOpen ? "w-[280px]" : "w-0 border-r-0 opacity-0 pointer-events-none"
+          isSidePanelOpen ? "w-[400px]" : "w-0 border-r-0 opacity-0 pointer-events-none"
         )}
       >
         {isSidePanelOpen && (
