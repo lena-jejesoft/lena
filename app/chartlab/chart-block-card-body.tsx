@@ -725,6 +725,8 @@ function Phase3Screen() {
   const [activeChartId, setActiveChartId] = useState<string>(SAMPLE_BLOCKS[0]?.id ?? "")
   const [sideTab, setSideTab] = useState<"data" | "series" | "style">("data")
   const [isSidePanelCollapsed, setIsSidePanelCollapsed] = useState(false)
+  const [sidePanelWidth, setSidePanelWidth] = useState<number>(360)
+  const [isResizingSidePanel, setIsResizingSidePanel] = useState<boolean>(false)
   const [showSemanticMappingPanel, setShowSemanticMappingPanel] = useState(true)
   const {
     state: hierarchyState,
@@ -878,6 +880,36 @@ function Phase3Screen() {
   )
   const isSidePanelOpen = !isSidePanelCollapsed
   const chartHeaderTitleOffset = isSidePanelOpen ? 0 : 40
+
+  // 좌측 패널 드래그 리사이즈. handle onMouseDown 으로 isResizingSidePanel=true 가 되면
+  // document 수준 mousemove/mouseup 리스너가 width 를 clientX 로 갱신. 드래그 끝나면 해제.
+  // min 240 / max 600 으로 클램프. body cursor/userSelect 를 드래그 중에만 잠가서 텍스트
+  // 드래그 선택을 막는다.
+  useEffect(() => {
+    if (!isResizingSidePanel) return
+    const SIDE_PANEL_MIN_WIDTH = 240
+    const SIDE_PANEL_MAX_WIDTH = 600
+    const handleMouseMove = (event: MouseEvent) => {
+      const next = Math.min(
+        SIDE_PANEL_MAX_WIDTH,
+        Math.max(SIDE_PANEL_MIN_WIDTH, event.clientX),
+      )
+      setSidePanelWidth(next)
+    }
+    const handleMouseUp = () => setIsResizingSidePanel(false)
+    document.addEventListener("mousemove", handleMouseMove)
+    document.addEventListener("mouseup", handleMouseUp)
+    const prevCursor = document.body.style.cursor
+    const prevUserSelect = document.body.style.userSelect
+    document.body.style.cursor = "col-resize"
+    document.body.style.userSelect = "none"
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove)
+      document.removeEventListener("mouseup", handleMouseUp)
+      document.body.style.cursor = prevCursor
+      document.body.style.userSelect = prevUserSelect
+    }
+  }, [isResizingSidePanel])
   const isActiveChartCoreType = String(activeBlock?.chartType ?? "").startsWith("chartCore/")
   const allowedChartTypes = useMemo(
     () => CHART_TYPE_OPTIONS.map((option) => option.value),
@@ -3238,9 +3270,10 @@ function Phase3Screen() {
         variant="fixed"
         bordered
         className={cn(
-          "shrink-0 transition-all duration-200",
-          isSidePanelOpen ? "w-[400px]" : "w-0 border-r-0 opacity-0 pointer-events-none"
+          "shrink-0 relative",
+          !isSidePanelOpen && "w-0 border-r-0 opacity-0 pointer-events-none"
         )}
+        style={isSidePanelOpen ? { width: sidePanelWidth } : undefined}
       >
         {isSidePanelOpen && (
           <>
@@ -3589,6 +3622,21 @@ function Phase3Screen() {
                 onApply={handleApplyDbRows}
               />
             </PanelBody>
+            {/* 드래그 리사이즈 핸들 — 우측 가장자리. onMouseDown 만 등록, 이동/해제는 useEffect 가 document 수준에서 처리. */}
+            <div
+              role="separator"
+              aria-orientation="vertical"
+              aria-label="좌측 패널 너비 조절"
+              onMouseDown={(event) => {
+                event.preventDefault()
+                setIsResizingSidePanel(true)
+              }}
+              className={cn(
+                "absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize z-20",
+                "hover:bg-accent/60 transition-colors",
+                isResizingSidePanel && "bg-accent/80",
+              )}
+            />
           </>
         )}
       </Panel>
