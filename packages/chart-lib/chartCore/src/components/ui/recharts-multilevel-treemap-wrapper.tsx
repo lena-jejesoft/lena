@@ -134,6 +134,10 @@ const truncateText = (text: string, maxWidth: number, fontSize: number): string 
   return text;
 };
 
+// Label 가드 — 같은 부모 내 형제 value 최대 비율이 이 임계 미만이면 그 부모의 모든 자식이
+// 라벨을 숨긴다 (all-or-none). "어떤 건 표시되고 어떤 건 숨겨지는" 형제 간 불일치 방지.
+const MLT_PARENT_LABEL_MIN_SIBLING_RATIO = 0.03; // 부모 내 최대 형제가 3% 미만이면 전원 숨김
+
 const CustomizedContent: React.FC<CustomContentProps> = (props) => {
   const {
     x = 0, y = 0, width = 0, height = 0,
@@ -164,6 +168,14 @@ const CustomizedContent: React.FC<CustomContentProps> = (props) => {
 
   // 비중 계산
   const percentage = totalSize > 0 ? ((size || 0) / totalSize * 100).toFixed(1) : "0.0";
+
+  // 부모 내 all-or-none 가드: 형제 총합 대비 최대 형제의 value 비율이 임계 이상이어야
+  // 이 부모 아래 모든 자식이 라벨을 띄운다. filteredData 는 현재 레벨의 형제 집합.
+  const parentTotalValue = filteredData?.reduce((s, it) => s + (it.size || 0), 0) ?? 0;
+  const maxSiblingRatio = parentTotalValue > 0 && filteredData && filteredData.length > 0
+    ? Math.max(...filteredData.map((it) => (it.size || 0) / parentTotalValue))
+    : 0;
+  const parentAllowsLabels = maxSiblingRatio >= MLT_PARENT_LABEL_MIN_SIBLING_RATIO;
 
   // 텍스트 영역 너비 (좌우 패딩 16px 제외) — UUID 를 seriesLabelMap 으로 변환 후 truncate
   const textMaxWidth = width - 16;
@@ -215,7 +227,7 @@ const CustomizedContent: React.FC<CustomContentProps> = (props) => {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       />
-      {width > 40 && height > 20 && (
+      {parentAllowsLabels && width > 40 && height > 20 && (
         <>
           <text
             x={x + 8}
