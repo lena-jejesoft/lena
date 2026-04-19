@@ -3313,7 +3313,7 @@ function Phase3Screen() {
                   <TabsTrigger value="style" className="flex-1 text-xs">스타일</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="data" className="mt-2">
+                <TabsContent value="data" className="mt-2" forceMount>
                   <SeriesAdditionPanel
                     activeBlock={activeBlock}
                     onUpdateBlock={(data, title, description) => {
